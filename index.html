@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#8e2453">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Para Anahí">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<!--PAGE-START-->
+<title>Canciones para Anahí</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Figtree:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: una columna de bolsillo; pestañas abajo; reproductor a pantalla completa con la letra al centro. Anahí solo recibe; el modo "Dedicar" aparece únicamente en el dispositivo de quien dedica. */
+:root{
+  --bg:#f7eef1; --surface:#fffafb; --ink:#2b1220; --muted:#7e6271; --line:#ead8df;
+  --accent:#a8204f; --accent-ink:#ffffff; --danger:#b3261e; --warn:#9a6700;
+  --song:#a8204f;
+  --f-display:"Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-hand:"Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#170d14; --surface:#24161f; --ink:#f7e9ef; --muted:#b39aa8; --line:#3a2632;
+  --accent:#ff7ba9; --accent-ink:#2b0a18; --danger:#ff8a80; --warn:#f0b64a; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#170d14; --surface:#24161f; --ink:#f7e9ef; --muted:#b39aa8; --line:#3a2632;
+  --accent:#ff7ba9; --accent-ink:#2b0a18; --danger:#ff8a80; --warn:#f0b64a; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.wrap{max-width:560px;margin:0 auto;padding-inline:18px;padding-block:20px calc(96px + env(safe-area-inset-bottom,0px))}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.brand svg{width:26px;height:26px;flex:none;color:var(--accent)}
+.brand h1{margin:0;font:400 1.55rem/1 var(--f-display);letter-spacing:.005em}
+.brand h1 em{color:var(--accent)}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0}
+h2{font:400 1.9rem/1.1 var(--f-display);margin:0 0 14px;text-wrap:balance}
+h3{font:600 .8rem/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:22px 0 10px}
+
+/* Hoy */
+.today{position:relative;overflow:hidden;border-radius:22px;padding:24px 22px 22px;color:#fff;
+  background:radial-gradient(120% 90% at 100% 0%, color-mix(in oklab,var(--song) 60%, #fff) 0%, transparent 60%),
+             linear-gradient(160deg, color-mix(in oklab,var(--song) 92%, #000) 0%, color-mix(in oklab,var(--song) 55%, #12060c) 100%);
+  display:grid;gap:12px}
+.today .date{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;opacity:.88;font-weight:600}
+.today .t{font:italic 400 2.6rem/1.02 var(--f-display);margin:0;text-wrap:balance}
+.today .a{opacity:.85;margin-top:-6px}
+.today .ded{font:500 1.5rem/1.2 var(--f-hand)}
+.today .preview{font:italic 400 1.15rem/1.35 var(--f-display);opacity:.8;border-left:2px solid rgba(255,255,255,.5);padding-left:12px}
+.today .rings{position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.18);box-shadow:0 0 0 22px rgba(255,255,255,.05),0 0 0 44px rgba(255,255,255,.035);pointer-events:none}
+.fresh{justify-self:start;background:rgba(255,255,255,.18);border-radius:999px;padding:3px 10px;font-size:.74rem;font-weight:700;letter-spacing:.06em}
+.bigplay{justify-self:start;display:inline-flex;align-items:center;gap:10px;border:0;border-radius:999px;
+  background:#fff;color:#2b1220;padding:12px 20px 12px 14px;font-weight:600}
+.bigplay svg{width:22px;height:22px}
+.count{margin-top:18px;color:var(--muted);font-size:.9rem}
+.count b{font:italic 400 1.2rem var(--f-display);color:var(--ink)}
+.empty{border:1px dashed var(--line);border-radius:var(--r);padding:26px 20px;text-align:center;color:var(--muted)}
+.empty .hand{display:block;font:500 1.6rem/1.2 var(--f-hand);color:var(--accent);margin-bottom:4px}
+.banner{font-size:.85rem;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:14px}
+
+/* Lista */
+.list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r);padding:12px 12px 12px 14px}
+.dot{position:relative;width:40px;height:40px;border-radius:50%;background:var(--c);display:grid;place-items:center;color:#fff;border:0}
+.dot svg{width:16px;height:16px}
+.dot.new::after{content:"";position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--surface)}
+.meta{min-width:0}
+.meta b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta span{color:var(--muted);font-size:.86rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta .hand{font:500 1.15rem/1.2 var(--f-hand);color:var(--ink);opacity:.85;white-space:normal;margin-top:2px}
+.when{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.tag{font-size:.7rem;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:color-mix(in oklab,var(--accent) 12%,transparent);color:var(--accent)}
+.tag.warn{background:color-mix(in oklab,var(--warn) 16%,transparent);color:var(--warn)}
+.tag.new{background:var(--accent);color:var(--accent-ink)}
+.more{border:0;background:none;color:var(--muted);padding:8px;border-radius:10px}
+.actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;padding-top:6px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 14px;font-weight:600;font-size:.9rem}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--danger)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.link{background:none;border:0;padding:0;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
+/* Formularios */
+form{display:grid;gap:16px}
+label{display:grid;gap:6px;font-weight:600;font-size:.88rem}
+label small{font-weight:400;color:var(--muted)}
+input[type=text],input[type=password],input[type=date],textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 12px;min-height:44px}
+textarea{min-height:200px;resize:vertical;font:14px/1.6 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+textarea.note{min-height:80px;font:500 1.3rem/1.3 var(--f-hand)}
+input[type=file]{font-size:.88rem;max-width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.two{grid-template-columns:1fr}}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatches input{position:absolute;opacity:0;pointer-events:none}
+.swatches label{display:block}
+.swatches span{display:block;width:34px;height:34px;border-radius:50%;background:var(--c);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--line)}
+.swatches input:checked+span{box-shadow:0 0 0 2px var(--ink)}
+.swatches input:focus-visible+span{outline:2px solid var(--accent);outline-offset:3px}
+.hint{font-size:.85rem;color:var(--muted);margin:0}
+.msg{font-size:.9rem;margin:0;min-height:1.3em}
+.msg.err{color:var(--danger)}
+.msg.ok{color:var(--accent)}
+.card{border:1px solid var(--line);background:var(--surface);border-radius:18px;padding:18px;display:grid;gap:14px}
+ol.steps{margin:0;padding-left:20px;display:grid;gap:6px;font-size:.9rem;color:var(--muted)}
+ol.steps b{color:var(--ink)}
+
+/* Sincronizador */
+.sync .clock{font:600 .9rem var(--f-body);font-variant-numeric:tabular-nums;color:var(--muted)}
+.sync .prev{color:var(--muted);font:italic 1rem/1.3 var(--f-display);min-height:1.3em}
+.sync .cur{font:italic 400 1.7rem/1.15 var(--f-display);min-height:2.3em;text-wrap:balance}
+.sync .cnt{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.mark{border:0;border-radius:16px;padding:22px;font-weight:700;font-size:1.1rem;background:var(--accent);color:var(--accent-ink)}
+.mark:active{transform:scale(.98)}
+
+/* Pestañas */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:color-mix(in oklab,var(--bg) 86%,transparent);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);
+  padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:6px}
+.tabs a{flex:1;max-width:150px;display:grid;justify-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:.74rem;font-weight:600;padding:6px;border-radius:12px}
+.tabs a svg{width:22px;height:22px}
+.tabs a[aria-current=page]{color:var(--accent)}
+
+/* Reproductor */
+.player{position:fixed;inset:0;z-index:10;display:grid;grid-template-rows:auto 1fr auto;color:#fff;
+  background:linear-gradient(170deg, color-mix(in oklab,var(--song) 80%, #000) 0%, color-mix(in oklab,var(--song) 35%, #0b0308) 75%);
+  padding:calc(12px + env(safe-area-inset-top,0px)) 0 calc(14px + env(safe-area-inset-bottom,0px))}
+.ptop{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding-inline:14px}
+.ptop .ttl{min-width:0;text-align:center}
+.ptop .ttl b{display:block;font:italic 400 1.25rem/1.15 var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptop .ttl span{font-size:.8rem;opacity:.75}
+.ibtn{border:0;background:rgba(255,255,255,.12);color:#fff;width:42px;height:42px;border-radius:50%;display:grid;place-items:center}
+.ibtn svg{width:20px;height:20px}
+.lyrics{overflow-y:auto;padding:28vh 26px 40vh;mask-image:linear-gradient(transparent 0,#000 18%,#000 78%,transparent 100%);-webkit-mask-image:linear-gradient(transparent 0,#000 18%,#000 78%,transparent 100%)}
+.lyrics .ded{font:500 1.7rem/1.2 var(--f-hand);opacity:.95;margin:0 0 28px}
+.ln{display:block;width:100%;text-align:left;border:0;background:none;color:inherit;padding:8px 0;
+  font:400 1.45rem/1.25 var(--f-display);opacity:.38;transition:opacity .35s, transform .35s;transform-origin:left center}
+.ln.past{opacity:.55}
+.ln.on{opacity:1;font-style:italic;transform:scale(1.12)}
+.static .ln{opacity:.9}
+.ln .tr{display:block;font:400 1rem/1.3 var(--f-body);opacity:.8;margin-top:3px;font-style:normal}
+.notr .ln .tr{display:none}
+.trbtn{border:0;background:rgba(255,255,255,.12);color:#fff;height:42px;min-width:42px;padding:0 12px;border-radius:999px;font-weight:700;font-size:.78rem;letter-spacing:.06em}
+.trbtn[aria-pressed=true]{background:#fff;color:#2b1220}
+.results{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.results button{width:100%;text-align:left;display:grid;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.results b{font-weight:600}
+.results span{font-size:.82rem;color:var(--muted)}
+select{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
+.pnote{font-size:.85rem;opacity:.75;margin:0 0 18px}
+.pbottom{padding-inline:22px;display:grid;gap:10px;max-width:560px;width:100%;margin:0 auto}
+.times{display:flex;justify-content:space-between;font-size:.75rem;opacity:.75;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:#fff}
+.pctl{display:flex;justify-content:center;align-items:center;gap:22px}
+.play{width:66px;height:66px;border-radius:50%;border:0;background:#fff;color:#2b1220;display:grid;place-items:center}
+.play svg{width:28px;height:28px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-heart" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 3 4.5 6.6 4.5c2.1 0 3.6 1.2 4.4 2.6.8-1.4 2.3-2.6 4.4-2.6 3.6 0 5.7 3.7 4.2 7.2C19.5 16.4 12 21 12 21z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path fill="currentColor" d="M6 5h2v14H6zM20 5.8v12.4a.8.8 0 0 1-1.2.7L9.5 12.7a.8.8 0 0 1 0-1.4l9.3-6.2a.8.8 0 0 1 1.2.7z"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path fill="currentColor" d="M16 5h2v14h-2zM4 5.8v12.4a.8.8 0 0 0 1.2.7l9.3-6.2a.8.8 0 0 0 0-1.4L5.2 5.1A.8.8 0 0 0 4 5.8z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></symbol>
+  <symbol id="i-env" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 15.2s-3.4-2-4.2-4c-.6-1.5.3-3 1.8-3 .9 0 1.6.5 2.4 1.3.8-.8 1.5-1.3 2.4-1.3 1.5 0 2.4 1.5 1.8 3-.8 2-4.2 4-4.2 4z" fill="currentColor"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 20l1-4.5L15.5 5a2.1 2.1 0 0 1 3 0l.5.5a2.1 2.1 0 0 1 0 3L8.5 19 4 20z"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></symbol>
+</svg>
+
+<main class="wrap">
+  <header class="brand">
+    <svg><use href="#i-heart"/></svg>
+    <h1>Canciones para <em>Anahí</em></h1>
+  </header>
+
+  <!-- HOY -->
+  <section id="v-hoy">
+    <p class="banner" id="adminBanner" hidden>Así lo ve Anahí hoy.</p>
+    <div id="todayBox"></div>
+    <p class="count" id="countLine"></p>
+  </section>
+
+  <!-- DEDICATORIAS -->
+  <section id="v-dedicatorias" hidden>
+    <p class="eyebrow">Para ti</p>
+    <h2>Todas tus canciones</h2>
+    <ul class="list" id="songList"></ul>
+  </section>
+
+  <!-- DEDICAR (solo quien dedica) -->
+  <section id="v-dedicar" hidden>
+    <p class="eyebrow" id="edEyebrow">Nueva dedicatoria</p>
+    <h2 id="edTitle">Dedicarle una canción</h2>
+    <form id="editor" novalidate>
+      <div class="two">
+        <label>Título
+          <input type="text" id="fTitle" autocomplete="off" placeholder="Nombre de la canción">
+        </label>
+        <label>Artista
+          <input type="text" id="fArtist" autocomplete="off" placeholder="Quién la canta">
+        </label>
+      </div>
+      <label>Tu mensaje para ella <small>Se ve con letra a mano en la tarjeta y arriba de la letra.</small>
+        <textarea id="fDed" class="note" placeholder="Esta me recuerda a la noche que…"></textarea>
+      </label>
+      <div class="two">
+        <label>Día que la recibe <small>Puedes programarla para otro día.</small>
+          <input type="date" id="fDate">
+        </label>
+        <div style="display:grid;gap:8px;align-content:start">
+          <span style="font-weight:600;font-size:.88rem">Color</span>
+          <div class="swatches" id="swatches"></div>
+        </div>
+      </div>
+      <label>Audio <small id="audioNow">MP3 o M4A desde tu iPhone (app Archivos).</small>
+        <input type="file" id="fAudio" accept="audio/*,.mp3,.m4a">
+      </label>
+      <div style="display:grid;gap:10px">
+        <label for="fLyrics">Letra <small>Búscala con el título y el artista, o pégala tú (un verso por renglón). Si viene con tiempos ([00:12.34]) ya queda sincronizada.</small></label>
+        <div class="row"><button type="button" class="btn" id="bFind">Buscar letra</button><span class="hint" id="findMsg"></span></div>
+        <ul class="results" id="findList" hidden></ul>
+        <textarea id="fLyrics" spellcheck="false" placeholder="Letra, un verso por renglón"></textarea>
+      </div>
+      <div style="display:grid;gap:10px">
+        <label for="fTrans">Traducción <small>Opcional, para canciones en otro idioma. Un renglón por verso, en el mismo orden que la letra. Anahí la verá debajo de cada verso.</small></label>
+        <div class="row">
+          <select id="fLang" aria-label="Idioma de la canción">
+            <option value="en">Del inglés</option><option value="pt">Del portugués</option><option value="fr">Del francés</option>
+            <option value="it">Del italiano</option><option value="ko">Del coreano</option><option value="ja">Del japonés</option>
+          </select>
+          <button type="button" class="btn" id="bTrans">Traducir automáticamente</button>
+        </div>
+        <textarea id="fTrans" spellcheck="true" placeholder="Traducción, un renglón por verso" style="min-height:140px"></textarea>
+        <span class="hint" id="transMsg"></span>
+      </div>
+
+      <div class="card sync" id="syncBox" hidden>
+        <div class="row" style="justify-content:space-between">
+          <span class="clock" id="sClock">0:00.0</span>
+          <span class="cnt" id="sCount"></span>
+        </div>
+        <div class="prev" id="sPrev"></div>
+        <div class="cur" id="sCur"></div>
+        <button type="button" class="mark" id="sMark">Marcar verso</button>
+        <div class="row">
+          <button type="button" class="btn" id="sUndo">Deshacer</button>
+          <button type="button" class="btn" id="sRestart">Empezar de nuevo</button>
+          <button type="button" class="btn" id="sCancel">Cancelar</button>
+        </div>
+        <p class="hint" id="sHint"></p>
+      </div>
+
+      <div class="row" id="edButtons">
+        <button type="button" class="btn" id="bSync">Sincronizar letra</button>
+        <button type="button" class="btn" id="bDraft">Guardar borrador</button>
+        <button type="submit" class="btn primary" id="bSend">Dedicársela</button>
+        <button type="button" class="btn" id="bCancelEdit" hidden>Cancelar edición</button>
+      </div>
+      <p class="msg" id="edMsg" role="status" aria-live="polite"></p>
+    </form>
+
+    <h3 id="draftsH" hidden>Borradores en este iPhone</h3>
+    <ul class="list" id="draftList"></ul>
+
+    <p class="hint" style="margin-top:26px"><button class="link" id="goSettings" type="button">Conexión para publicar</button></p>
+  </section>
+
+  <!-- AJUSTES (solo quien dedica) -->
+  <section id="v-ajustes" hidden>
+    <p class="eyebrow">Modo para dedicar</p>
+    <h2>Conexión para publicar</h2>
+    <div class="card">
+      <ol class="steps">
+        <li>En GitHub: <b>Settings → Developer settings → Fine-grained tokens → Generate new token</b>.</li>
+        <li>Repository access: <b>solo el repositorio de la app</b>.</li>
+        <li>Permissions → Repository → <b>Contents: Read and write</b>.</li>
+        <li>Copia el token y pégalo aquí. Se guarda solo en este iPhone.</li>
+      </ol>
+      <form id="cfgForm" novalidate>
+        <div class="two">
+          <label>Usuario de GitHub<input type="text" id="cOwner" autocomplete="off" autocapitalize="off" placeholder="juanpablo"></label>
+          <label>Repositorio<input type="text" id="cRepo" autocomplete="off" autocapitalize="off" placeholder="canciones-para-anahi"></label>
+        </div>
+        <div class="two">
+          <label>Rama<input type="text" id="cBranch" autocomplete="off" autocapitalize="off" value="main"></label>
+          <label>Token<input type="password" id="cToken" autocomplete="off" placeholder="github_pat_…"></label>
+        </div>
+        <div class="row">
+          <button type="submit" class="btn primary">Guardar y probar</button>
+          <button type="button" class="btn danger" id="cLogout">Quitar modo dedicar de este dispositivo</button>
+        </div>
+        <p class="msg" id="cMsg" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="Secciones">
+  <a href="#hoy" data-v="hoy"><svg><use href="#i-sun"/></svg>Hoy</a>
+  <a href="#dedicatorias" data-v="dedicatorias"><svg><use href="#i-env"/></svg>Dedicatorias</a>
+  <a href="#dedicar" data-v="dedicar" id="tabDedicar" hidden><svg><use href="#i-pen"/></svg>Dedicar</a>
+</nav>
+
+<!-- REPRODUCTOR -->
+<div class="player" id="player" hidden>
+  <div class="ptop">
+    <button class="ibtn" id="pClose" aria-label="Cerrar reproductor"><svg><use href="#i-down"/></svg></button>
+    <div class="ttl"><b id="pTitle"></b><span id="pArtist"></span></div>
+    <button class="trbtn" id="pTr" aria-pressed="true" aria-label="Mostrar traducción" hidden>ES</button>
+  </div>
+  <div class="lyrics" id="pLyrics"></div>
+  <div class="pbottom">
+    <input type="range" id="pSeek" min="0" max="100" step="0.1" value="0" aria-label="Posición de la canción">
+    <div class="times"><span id="pCur">0:00</span><span id="pDur">0:00</span></div>
+    <div class="pctl">
+      <button class="ibtn" id="pPrev" aria-label="Canción anterior"><svg><use href="#i-prev"/></svg></button>
+      <button class="play" id="pPlay" aria-label="Reproducir"><svg><use href="#i-play"/></svg></button>
+      <button class="ibtn" id="pNext" aria-label="Siguiente canción"><svg><use href="#i-next"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+const COLORS = [["Rosa","#d6336c"],["Vino","#8e2453"],["Coral","#e0603f"],["Lavanda","#7d64c9"],["Océano","#2f78ad"],["Oro","#b98a1e"]];
+// Canción de muestra con letra original; se muestra solo si todavía no existe songs/songs.json.
+const DEMO = { id:"0000-muestra", title:"Canción de muestra", artist:"Para Anahí", dedication:"Así se verá cada canción que te dedique", color:"#8e2453", date:null, audio:null,
+  lyrics:"[00:01.00]Esta es una canción de muestra\n[00:04.60]para ver cómo avanza la letra\n[00:08.20]cada verso se enciende a su tiempo\n[00:11.80]como tu nombre en mi pensamiento\n[00:15.80]Toca cualquier línea para saltar\n[00:19.40]y pronto habrá canciones de verdad\n[00:23.20]♪" };
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = (t, dec) => { if (!isFinite(t) || t < 0) t = 0; const m = Math.floor(t/60), s = t - m*60;
+  return dec ? `${m}:${s.toFixed(1).padStart(4,"0")}` : `${m}:${String(Math.floor(s)).padStart(2,"0")}`; };
+const lrcTime = t => { const m = Math.floor(t/60), s = t - m*60; return `${String(m).padStart(2,"0")}:${s.toFixed(2).padStart(5,"0")}`; };
+const slug = s => (s||"cancion").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40) || "cancion";
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ls = { get(k, d){ try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+             set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+             del(k){ try { localStorage.removeItem(k); } catch {} } };
+
+/* ---------- Fechas (hora local del celular) ---------- */
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const today = () => ymd(new Date());
+const dayNum = str => { const [y,m,d] = str.split("-").map(Number); return Math.floor(Date.UTC(y, m-1, d) / 864e5); };
+const niceDate = (str, opts = { day:"numeric", month:"short" }) => { if (!str) return ""; const [y,m,d] = str.split("-").map(Number);
+  return new Intl.DateTimeFormat("es-MX", opts).format(new Date(y, m-1, d)).replace(".", ""); };
+
+/* ---------- Letra ---------- */
+function parseLyrics(text){
+  const timeRe = /\[(\d{1,3}):(\d{1,2}(?:[.:]\d{1,3})?)\]/g, timed = [], plain = [];
+  for (const raw of String(text||"").split(/\r?\n/)) {
+    const line = raw.trim(); if (!line) continue;
+    if (/^\[[a-z]+:[^\]]*\]$/i.test(line)) continue;
+    const times = [...line.matchAll(timeRe)], content = line.replace(timeRe, "").trim();
+    if (times.length) for (const m of times) timed.push({ t: +m[1]*60 + parseFloat(m[2].replace(":", ".")), text: content || "♪" });
+    else plain.push({ t: null, text: content });
+  }
+  return timed.length ? timed.sort((a,b) => a.t - b.t) : plain;
+}
+const isSynced = lines => lines.length > 0 && lines.every(l => l.t != null);
+const toLRC = lines => lines.map(l => l.t != null ? `[${lrcTime(l.t)}]${l.text}` : l.text).join("\n");
+
+/* ---------- Borradores locales (IndexedDB, solo quien dedica) ---------- */
+function idb(){ return new Promise((res, rej) => { const r = indexedDB.open("canciones-anahi", 2);
+  r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains("drafts")) r.result.createObjectStore("drafts", { keyPath: "id" }); };
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function idbDo(mode, fn){ const db = await idb(); return new Promise((res, rej) => {
+  const tx = db.transaction("drafts", mode), q = fn(tx.objectStore("drafts"));
+  tx.oncomplete = () => res(q && q.result); tx.onerror = () => rej(tx.error); }); }
+const draftsAll = () => idbDo("readonly", s => s.getAll()).catch(() => []);
+const draftPut = d => idbDo("readwrite", s => s.put(d));
+const draftDel = id => idbDo("readwrite", s => s.delete(id)).catch(() => {});
+
+/* ---------- Conexión con GitHub (publicar) ---------- */
+const cfg = () => ls.get("anahi-cfg", null);
+const isAdmin = () => !!cfg();
+async function gh(path, opts = {}){
+  const c = cfg(); if (!c) throw Object.assign(new Error("nocfg"), { status: 0 });
+  let r;
+  try {
+    r = await fetch(`https://api.github.com/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}${path}`, {
+      method: opts.method || "GET", cache: "no-store",
+      headers: { Authorization: `Bearer ${c.token}`, Accept: opts.accept || "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", ...(opts.body ? { "Content-Type": "application/json" } : {}) },
+      body: opts.body ? JSON.stringify(opts.body) : undefined });
+  } catch { throw Object.assign(new Error("net"), { status: -1 }); }
+  if (!r.ok) throw Object.assign(new Error("http"), { status: r.status });
+  return opts.raw ? r.text() : r.json();
+}
+function ghError(e){
+  if (e.status === -1) return "No se pudo conectar con GitHub. Revisa tu internet e intenta de nuevo.";
+  if (e.status === 0) return "Primero configura la conexión para publicar.";
+  if (e.status === 401) return "GitHub no aceptó el token. Puede haber expirado: genera uno nuevo en Conexión para publicar.";
+  if (e.status === 403 || e.status === 404) return "El token no tiene permiso de escritura en ese repositorio, o el usuario o repositorio están mal escritos.";
+  if (e.status === 409 || e.status === 422) return "GitHub rechazó el cambio porque el repositorio cambió al mismo tiempo. Vuelve a intentarlo.";
+  return `GitHub respondió con un error (${e.status}). Vuelve a intentarlo en un momento.`;
+}
+async function readRemoteSongs(){
+  const c = cfg();
+  try { const txt = await gh(`/contents/songs/songs.json?ref=${encodeURIComponent(c.branch)}`, { accept: "application/vnd.github.raw+json", raw: true });
+        const j = JSON.parse(txt); return Array.isArray(j) ? j : (j.songs || []); }
+  catch (e) { if (e.status === 404) return []; throw e; }
+}
+const blobToB64 = blob => new Promise((res, rej) => { const fr = new FileReader();
+  fr.onload = () => res(String(fr.result).split(",")[1]); fr.onerror = () => rej(fr.error); fr.readAsDataURL(blob); });
+// Un solo commit con todos los cambios (audio nuevo, lista actualizada, audio borrado).
+async function commit(files, message, onStep){
+  const b = encodeURIComponent(cfg().branch);
+  const ref = await gh(`/git/ref/heads/${b}`), base = ref.object.sha;
+  const head = await gh(`/git/commits/${base}`);
+  const tree = [];
+  for (const f of files) {
+    if (f.remove) { tree.push({ path: f.path, mode: "100644", type: "blob", sha: null }); continue; }
+    onStep && onStep(f.label);
+    const blob = await gh(`/git/blobs`, { method: "POST", body: { content: f.content, encoding: f.encoding } });
+    tree.push({ path: f.path, mode: "100644", type: "blob", sha: blob.sha });
+  }
+  const t = await gh(`/git/trees`, { method: "POST", body: { base_tree: head.tree.sha, tree } });
+  const c = await gh(`/git/commits`, { method: "POST", body: { message, tree: t.sha, parents: [base] } });
+  await gh(`/git/refs/heads/${b}`, { method: "PATCH", body: { sha: c.sha } });
+}
+const songsFile = list => ({ path: "songs/songs.json", content: JSON.stringify({ songs: list }, null, 2) + "\n", encoding: "utf-8", label: "Actualizando la lista" });
+
+/* ---------- Estado ---------- */
+const S = { songs: [], drafts: [], openMenu: null, confirmDel: null };
+const trLines = t => String(t||"").split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+const withLines = s => ({ ...s, lines: parseLyrics(s.lyrics), tr: trLines(s.translation) });
+
+async function loadSongs(){
+  if (isAdmin()) { try { return (await readRemoteSongs()).map(withLines); } catch {} }
+  try {
+    const r = await fetch(`songs/songs.json?v=${Date.now()}`, { cache: "no-store" });
+    if (!r.ok) throw 0;
+    const j = await r.json();
+    return (Array.isArray(j) ? j : (j.songs || [])).map(withLines);
+  } catch { return [withLines(DEMO)]; }
+}
+async function refresh(reloadSongs = true){
+  if (reloadSongs) S.songs = await loadSongs();
+  if (isAdmin()) S.drafts = (await draftsAll()).map(d => ({ ...withLines(d), draft: true }));
+  renderToday(); renderList(); renderDrafts();
+}
+const byId = (a,b) => String(a.id).localeCompare(String(b.id));
+const visible = (t = today()) => S.songs.filter(s => !s.date || s.date <= t);
+const herOrder = () => visible().sort((a,b) => (b.date||"").localeCompare(a.date||"") || byId(b,a));
+
+/* Canción del día: la dedicada para hoy; si hoy no hay nueva, una de las anteriores en rotación. El widget usa la misma regla. */
+function songOfDay(){
+  const t = today(), vis = visible(t).sort(byId);
+  if (!vis.length) return null;
+  const fresh = vis.filter(s => s.date === t);
+  if (fresh.length) return { song: fresh[fresh.length-1], fresh: true };
+  return { song: vis[dayNum(t) % vis.length], fresh: false };
+}
+const seen = new Set(ls.get("anahi-seen", []));
+const markSeen = id => { if (!seen.has(id)) { seen.add(id); ls.set("anahi-seen", [...seen]); } };
+const isNew = s => s.date && !seen.has(s.id) && s.id !== DEMO.id;
+
+/* ---------- Vistas ---------- */
+function renderToday(){
+  $("#adminBanner").hidden = !isAdmin();
+  const box = $("#todayBox"), pick = songOfDay();
+  if (!pick) {
+    box.innerHTML = `<div class="empty"><span class="hand">Muy pronto</span>Aquí va a llegar tu primera canción.</div>`;
+    $("#countLine").textContent = ""; return;
+  }
+  const s = pick.song;
+  const date = new Intl.DateTimeFormat("es-MX", { weekday:"long", day:"numeric", month:"long" }).format(new Date());
+  const first = s.lines.find(l => l.text && l.text !== "♪");
+  box.innerHTML = `
+    <article class="today" style="--song:${esc(s.color||"#a8204f")}">
+      <span class="rings"></span>
+      <span class="date">${esc(date)}</span>
+      ${pick.fresh ? `<span class="fresh">NUEVA · HOY TE DEDICO ESTA</span>` : `<span class="fresh">PARA ESCUCHAR HOY</span>`}
+      <h2 class="t">${esc(s.title)}</h2>
+      <div class="a">${esc(s.artist||"")}</div>
+      ${s.dedication ? `<div class="ded">${esc(s.dedication)}</div>` : ""}
+      ${first ? `<div class="preview">${esc(first.text)}</div>` : ""}
+      <button class="bigplay" id="playToday"><svg><use href="#i-play"/></svg>Escuchar con la letra</button>
+    </article>`;
+  $("#playToday").onclick = () => openPlayer(s, herOrder());
+  const n = visible().filter(x => x.id !== DEMO.id).length;
+  $("#countLine").innerHTML = n ? `Llevas <b>${n}</b> ${n === 1 ? "canción dedicada" : "canciones dedicadas"}.` : "";
+}
+
+function renderList(){
+  const ul = $("#songList"), admin = isAdmin(), t = today();
+  const list = admin ? [...S.songs].sort((a,b) => (b.date||"").localeCompare(a.date||"") || byId(b,a)) : herOrder();
+  if (!list.length) { ul.innerHTML = `<li class="empty"><span class="hand">Muy pronto</span>Aquí se irán guardando todas tus canciones.</li>`; return; }
+  ul.innerHTML = list.map(s => {
+    const scheduled = s.date && s.date > t, open = S.openMenu === s.id;
+    return `<li class="item" data-id="${esc(s.id)}">
+      <button class="dot ${!admin && isNew(s) ? "new" : ""}" style="--c:${esc(s.color||"#a8204f")}" data-act="play" aria-label="Reproducir ${esc(s.title)}"><svg><use href="#i-play"/></svg></button>
+      <div class="meta"><b>${esc(s.title)}</b><span>${esc(s.artist||"")}</span>
+        ${s.dedication ? `<div class="hand">${esc(s.dedication)}</div>` : ""}
+        <div class="tags">
+          ${!admin && isNew(s) ? `<span class="tag new">Nueva</span>` : ""}
+          ${admin && scheduled ? `<span class="tag">Programada · ${esc(niceDate(s.date))}</span>` : ""}
+          ${admin && !isSynced(s.lines) ? `<span class="tag warn">Letra sin sincronizar</span>` : ""}
+          ${admin && !s.audio ? `<span class="tag warn">Sin audio</span>` : ""}
+        </div></div>
+      ${admin && s.id !== DEMO.id ? `<button class="more" data-act="menu" aria-label="Opciones de ${esc(s.title)}" aria-expanded="${open}"><svg width="20" height="20"><use href="#i-dots"/></svg></button>`
+              : `<span class="when">${esc(niceDate(s.date))}</span>`}
+      ${open ? `<div class="actions"><button class="btn" data-act="edit">Editar</button><button class="btn danger" data-act="del">Eliminar</button></div>` : ""}
+      ${S.confirmDel === s.id ? `<div class="actions"><span class="hint" style="flex-basis:100%">¿Quitar "${esc(s.title)}"? Anahí ya no la verá.</span>
+        <button class="btn danger" data-act="delyes">Sí, quitarla</button><button class="btn" data-act="delno">No</button></div>` : ""}
+    </li>`;
+  }).join("");
+}
+$("#songList").addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const id = b.closest(".item").dataset.id, s = S.songs.find(x => x.id === id), act = b.dataset.act;
+  if (act === "play") return openPlayer(s, isAdmin() ? S.songs : herOrder());
+  if (act === "menu") { S.openMenu = S.openMenu === id ? null : id; S.confirmDel = null; return renderList(); }
+  if (act === "edit") { S.openMenu = null; renderList(); startEdit(s, false); location.hash = "dedicar"; return; }
+  if (act === "del") { S.confirmDel = id; S.openMenu = null; return renderList(); }
+  if (act === "delno") { S.confirmDel = null; return renderList(); }
+  if (act === "delyes") {
+    b.disabled = true; b.textContent = "Quitando…";
+    try {
+      const remote = await readRemoteSongs(), old = remote.find(x => x.id === id);
+      const next = remote.filter(x => x.id !== id);
+      const files = [songsFile(next)];
+      if (old?.audio && !next.some(x => x.audio === old.audio)) files.push({ path: old.audio, remove: true });
+      await commit(files, `Quitar: ${old?.title || id}`);
+      S.songs = next.map(withLines); S.confirmDel = null; await refresh(false);
+    } catch (err) { S.confirmDel = null; renderList(); alertMsg(ghError(err)); }
+  }
+});
+function alertMsg(t){ location.hash = "dedicar"; msg(t, "err"); }
+
+function renderDrafts(){
+  const ul = $("#draftList");
+  $("#draftsH").hidden = !S.drafts.length;
+  ul.innerHTML = S.drafts.sort((a,b) => (b.updated||0) - (a.updated||0)).map(d => `
+    <li class="item" data-id="${esc(d.id)}">
+      <button class="dot" style="--c:${esc(d.color)}" data-act="play" aria-label="Escuchar ${esc(d.title)}"><svg><use href="#i-play"/></svg></button>
+      <div class="meta"><b>${esc(d.title || "Sin título")}</b><span>${esc(d.artist||"")}</span>
+        <div class="tags">${d.publishedId ? `<span class="tag">Cambios sin publicar</span>` : ""}${!isSynced(d.lines) ? `<span class="tag warn">Letra sin sincronizar</span>` : ""}</div></div>
+      <span class="row" style="gap:4px"><button class="btn" data-act="edit">Seguir</button><button class="more" data-act="del" aria-label="Borrar borrador">✕</button></span>
+    </li>`).join("");
+}
+$("#draftList").addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const d = S.drafts.find(x => x.id === b.closest(".item").dataset.id);
+  if (b.dataset.act === "play") return openPlayer(d, [d]);
+  if (b.dataset.act === "edit") { startEdit(d, true); window.scrollTo(0, 0); return; }
+  if (b.dataset.act === "del") { await draftDel(d.id); if (E.draftId === d.id) resetEditor(); await refresh(false); }
+});
+
+/* ---------- Relojes ---------- */
+function audioClock(el, url){
+  el.src = url; el.load();
+  return { kind:"audio", play: () => el.play().catch(() => {}), pause: () => el.pause(), playing: () => !el.paused,
+    time: () => el.currentTime || 0, duration: () => isFinite(el.duration) ? el.duration : 0,
+    seek: t => { el.currentTime = t; }, stop: () => { el.pause(); el.removeAttribute("src"); el.load(); } };
+}
+function virtualClock(dur){
+  let off = 0, start = 0, on = false;
+  const c = { kind:"virtual",
+    time: () => Math.min(on ? off + (performance.now() - start) / 1000 : off, dur || Infinity),
+    play: () => { if (!on) { if (dur && off >= dur) off = 0; start = performance.now(); on = true; } },
+    pause: () => { off = c.time(); on = false; }, playing: () => on && (!dur || c.time() < dur),
+    duration: () => dur, seek: t => { off = t; if (on) start = performance.now(); }, stop: () => { on = false; } };
+  return c;
+}
+
+/* ---------- Reproductor ---------- */
+const P = { song:null, queue:[], clock:null, idx:-2, raf:0, url:null, dragging:false, els:[] };
+const pAudio = new Audio(); pAudio.preload = "auto";
+pAudio.addEventListener("ended", () => setPlayIcon(false));
+
+function openPlayer(s, queue){
+  closePlayer(true);
+  P.song = s; P.queue = queue && queue.length ? queue : [s]; P.idx = -2;
+  if (!isAdmin()) { markSeen(s.id); renderList(); }
+  const pl = $("#player"); pl.style.setProperty("--song", s.color || "#a8204f"); pl.hidden = false;
+  document.body.style.overflow = "hidden";
+  $("#pTitle").textContent = s.title || "Sin título"; $("#pArtist").textContent = s.artist || "";
+  const synced = isSynced(s.lines), box = $("#pLyrics");
+  box.classList.toggle("static", !synced);
+  box.innerHTML = (s.dedication ? `<p class="ded">${esc(s.dedication)}</p>` : "")
+    + (s.lines.length ? s.lines.map((l,i) => `<button class="ln" data-i="${i}">${esc(l.text)}${s.tr && s.tr[i] && s.tr[i] !== l.text ? `<span class="tr">${esc(s.tr[i])}</span>` : ""}</button>`).join("") : `<p class="pnote">Esta canción no tiene letra todavía.</p>`);
+  const hasTr = !!(s.tr && s.tr.length);
+  $("#pTr").hidden = !hasTr; applyTr();
+  P.els = [...box.querySelectorAll(".ln")]; box.scrollTop = 0;
+  P.url = s.audioBlob ? URL.createObjectURL(s.audioBlob) : (s.audio || null);
+  const lastT = synced ? s.lines[s.lines.length-1].t : 0;
+  P.clock = P.url ? audioClock(pAudio, P.url) : virtualClock(Math.max(lastT + 6, 10));
+  if ("mediaSession" in navigator) try {
+    navigator.mediaSession.metadata = new MediaMetadata({ title: s.title, artist: s.artist || "", album: "Canciones para Anahí", artwork: [{ src: "icons/icon-512.png", sizes: "512x512", type: "image/png" }] });
+    navigator.mediaSession.setActionHandler("play", () => togglePlay(true));
+    navigator.mediaSession.setActionHandler("pause", () => togglePlay(false));
+    navigator.mediaSession.setActionHandler("previoustrack", () => step(-1));
+    navigator.mediaSession.setActionHandler("nexttrack", () => step(1));
+  } catch {}
+  togglePlay(true);
+  cancelAnimationFrame(P.raf); P.raf = requestAnimationFrame(tick);
+}
+function closePlayer(keepOpen){
+  cancelAnimationFrame(P.raf);
+  if (P.clock) P.clock.stop();
+  if (P.url && P.url.startsWith("blob:")) URL.revokeObjectURL(P.url);
+  P.clock = null; P.url = null;
+  if (!keepOpen) { $("#player").hidden = true; document.body.style.overflow = ""; }
+}
+function setPlayIcon(on){ $("#pPlay").innerHTML = `<svg><use href="#i-${on ? "pause" : "play"}"/></svg>`; $("#pPlay").setAttribute("aria-label", on ? "Pausar" : "Reproducir"); }
+function togglePlay(force){ if (!P.clock) return; const want = force ?? !P.clock.playing(); want ? P.clock.play() : P.clock.pause(); setPlayIcon(want); }
+function step(d){ const q = P.queue, i = q.findIndex(x => x.id === P.song?.id); if (i < 0 || q.length < 2) return; openPlayer(q[(i + d + q.length) % q.length], q); }
+function activeIndex(t){ const L = P.song.lines; let idx = -1;
+  for (let i = 0; i < L.length; i++) { if (L[i].t <= t + 0.08) idx = i; else break; } return idx; }
+function tick(){
+  const c = P.clock; if (!c) return;
+  const t = c.time(), d = c.duration();
+  if (!P.dragging) { $("#pSeek").max = d || 100; $("#pSeek").value = t; }
+  $("#pCur").textContent = fmt(t); $("#pDur").textContent = fmt(d);
+  if (c.kind === "virtual" && d && t >= d && $("#pPlay").getAttribute("aria-label") === "Pausar") setPlayIcon(false);
+  if (isSynced(P.song.lines)) {
+    const idx = activeIndex(t);
+    if (idx !== P.idx) {
+      P.idx = idx;
+      P.els.forEach((el, i) => { el.classList.toggle("on", i === idx); el.classList.toggle("past", i < idx); });
+      if (P.els[idx]) P.els[idx].scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
+    }
+  }
+  P.raf = requestAnimationFrame(tick);
+}
+$("#pLyrics").addEventListener("click", e => { const b = e.target.closest(".ln"); if (!b || !P.clock) return;
+  const l = P.song.lines[+b.dataset.i]; if (l.t == null) return; P.clock.seek(Math.max(0, l.t - 0.05)); togglePlay(true); });
+function applyTr(){ const on = ls.get("anahi-tr", true); $("#pLyrics").classList.toggle("notr", !on); $("#pTr").setAttribute("aria-pressed", String(on)); $("#pTr").setAttribute("aria-label", on ? "Ocultar traducción" : "Mostrar traducción"); }
+$("#pTr").onclick = () => { ls.set("anahi-tr", !ls.get("anahi-tr", true)); applyTr(); P.idx = -2; };
+$("#pPlay").onclick = () => togglePlay();
+$("#pPrev").onclick = () => step(-1);
+$("#pNext").onclick = () => step(1);
+$("#pClose").onclick = () => closePlayer();
+const seek = $("#pSeek");
+seek.addEventListener("input", () => { P.dragging = true; });
+seek.addEventListener("change", () => { P.clock && P.clock.seek(+seek.value); P.dragging = false; });
+document.addEventListener("keydown", e => {
+  if ($("#player").hidden) return;
+  if (e.key === "Escape") closePlayer();
+  if (e.code === "Space" && e.target === document.body) { e.preventDefault(); togglePlay(); }
+});
+
+/* ---------- Editor de dedicatorias ---------- */
+const sw = $("#swatches");
+sw.innerHTML = COLORS.map(([n,c],i) => `<label title="${n}"><input type="radio" name="color" id="c${i}" value="${c}" ${i===0?"checked":""} aria-label="${n}"><span style="--c:${c}"></span></label>`).join("");
+const E = { draftId:null, publishedId:null, audioBlob:null, audioName:null, keptAudio:null, sync:null };
+function msg(t, kind){ const m = $("#edMsg"); m.textContent = t; m.className = "msg" + (kind ? " " + kind : ""); }
+function setAudioLabel(){
+  $("#audioNow").textContent = E.audioBlob ? `Audio: ${E.audioName || "archivo seleccionado"}`
+    : E.keptAudio ? "Se conserva el audio que ya tiene. Elige otro solo si quieres cambiarlo."
+    : "MP3 o M4A desde tu iPhone (app Archivos).";
+}
+function resetEditor(){
+  Object.assign(E, { draftId:null, publishedId:null, audioBlob:null, audioName:null, keptAudio:null });
+  $("#editor").reset(); $("#c0").checked = true; $("#fDate").value = today();
+  $("#edEyebrow").textContent = "Nueva dedicatoria"; $("#edTitle").textContent = "Dedicarle una canción";
+  $("#bCancelEdit").hidden = true; setAudioLabel();
+  $("#findList").hidden = true; $("#findMsg").textContent = ""; $("#transMsg").textContent = "";
+}
+function startEdit(s, isDraft){
+  resetEditor();
+  E.draftId = isDraft ? s.id : null;
+  E.publishedId = isDraft ? (s.publishedId || null) : s.id;
+  E.audioBlob = s.audioBlob || null; E.audioName = s.audioName || null;
+  E.keptAudio = isDraft ? (s.keptAudio || null) : (s.audio || null);
+  $("#fTitle").value = s.title || ""; $("#fArtist").value = s.artist || ""; $("#fDed").value = s.dedication || "";
+  $("#fDate").value = s.date || today(); $("#fLyrics").value = toLRC(s.lines); $("#fTrans").value = s.translation || "";
+  const r = [...sw.querySelectorAll("input")].find(i => i.value === s.color); if (r) r.checked = true;
+  $("#edEyebrow").textContent = E.publishedId ? "Editando dedicatoria" : "Borrador";
+  $("#edTitle").textContent = s.title || "Sin título";
+  $("#bCancelEdit").hidden = false; setAudioLabel(); msg("");
+}
+function formSong(){
+  return { title: $("#fTitle").value.trim(), artist: $("#fArtist").value.trim(), dedication: $("#fDed").value.trim(),
+    color: (sw.querySelector("input:checked") || {}).value || COLORS[0][1], date: $("#fDate").value || today(),
+    lyrics: toLRC(parseLyrics($("#fLyrics").value)), translation: trLines($("#fTrans").value).join("\n") };
+}
+$("#fAudio").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 40 * 1024 * 1024) { e.target.value = ""; return msg("Ese archivo pesa más de 40 MB. Usa un MP3 normal (unos 3 a 10 MB).", "err"); }
+  E.audioBlob = f; E.audioName = f.name; setAudioLabel(); msg("");
+  if (!$("#fTitle").value) $("#fTitle").value = f.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ");
+});
+$("#bCancelEdit").onclick = () => { resetEditor(); msg(""); };
+
+$("#bDraft").onclick = async () => {
+  if (E.sync) return msg("Termina o cancela la sincronización primero.", "err");
+  const f = formSong();
+  if (!f.title && !f.lyrics) return msg("Escribe al menos el título o la letra para guardar el borrador.", "err");
+  const id = E.draftId || `d-${Date.now().toString(36)}`;
+  try { await draftPut({ id, ...f, audioBlob: E.audioBlob, audioName: E.audioName, keptAudio: E.keptAudio, publishedId: E.publishedId, updated: Date.now() }); }
+  catch { return msg("No se pudo guardar el borrador en este navegador.", "err"); }
+  E.draftId = id; await refresh(false); msg("Borrador guardado en este iPhone. Anahí todavía no lo ve.", "ok");
+};
+
+$("#editor").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (E.sync) return msg("Termina o cancela la sincronización primero.", "err");
+  if (!isAdmin()) { msg("Primero configura la conexión para publicar.", "err"); return; }
+  const f = formSong();
+  if (!f.title) { $("#fTitle").focus(); return msg("Ponle el título de la canción.", "err"); }
+  const btn = $("#bSend"); btn.disabled = true; $("#bDraft").disabled = true;
+  try {
+    msg("Preparando…");
+    const remote = await readRemoteSongs();
+    const id = E.publishedId || `${f.date.replace(/-/g,"")}-${Date.now().toString(36).slice(-4)}-${slug(f.title)}`;
+    const prev = remote.find(x => x.id === id);
+    let audio = E.keptAudio || prev?.audio || null;
+    const files = [];
+    if (E.audioBlob) {
+      const ext = (E.audioName || "").match(/\.[a-z0-9]{2,4}$/i)?.[0]?.toLowerCase() || (E.audioBlob.type.includes("mp4") || E.audioBlob.type.includes("m4a") ? ".m4a" : ".mp3");
+      const newPath = `songs/${id}${ext}`;
+      files.push({ path: newPath, content: await blobToB64(E.audioBlob), encoding: "base64", label: "Subiendo el audio" });
+      if (audio && audio !== newPath) files.push({ path: audio, remove: true });
+      audio = newPath;
+    }
+    const entry = { id, title: f.title, artist: f.artist, dedication: f.dedication, color: f.color, date: f.date, audio, lyrics: f.lyrics, ...(f.translation ? { translation: f.translation } : {}) };
+    const next = prev ? remote.map(x => x.id === id ? entry : x) : [...remote, entry];
+    files.push(songsFile(next));
+    await commit(files, `${prev ? "Editar" : "Dedicar"}: ${f.title}`, label => msg(`${label}…`));
+    if (E.draftId) await draftDel(E.draftId);
+    S.songs = next.map(withLines);
+    const when = f.date > today() ? `la recibirá el ${niceDate(f.date, { day:"numeric", month:"long" })}` : "la verá en un par de minutos";
+    resetEditor(); await refresh(false);
+    msg(`Listo, ${prev ? "cambios publicados" : "dedicada"}. Anahí ${when}.`, "ok");
+  } catch (err) { msg(ghError(err), "err"); }
+  finally { btn.disabled = false; $("#bDraft").disabled = false; }
+});
+
+/* Buscar letra en LRCLIB (base de datos abierta de letras, muchas ya sincronizadas) */
+let found = [];
+$("#bFind").onclick = async () => {
+  const title = $("#fTitle").value.trim(), artist = $("#fArtist").value.trim(), m = $("#findMsg"), ul = $("#findList");
+  if (!title) { $("#fTitle").focus(); m.textContent = "Escribe primero el título (y si puedes, el artista)."; return; }
+  m.textContent = "Buscando…"; ul.hidden = true;
+  try {
+    const q = new URLSearchParams({ track_name: title }); if (artist) q.set("artist_name", artist);
+    let r = await fetch(`https://lrclib.net/api/search?${q}`);
+    found = r.ok ? await r.json() : [];
+    if (!found.length && artist) { r = await fetch(`https://lrclib.net/api/search?${new URLSearchParams({ q: `${title} ${artist}` })}`); found = r.ok ? await r.json() : []; }
+  } catch { m.textContent = "No se pudo buscar. Revisa tu internet o pega la letra tú."; return; }
+  found = found.filter(x => x.plainLyrics || x.syncedLyrics)
+    .sort((a,b) => (!!b.syncedLyrics - !!a.syncedLyrics)).slice(0, 6);
+  if (!found.length) { m.textContent = "No encontré esa canción. Revisa cómo está escrito el título o pega la letra tú."; return; }
+  m.textContent = "Elige la versión que coincide con tu audio (fíjate en la duración):";
+  ul.innerHTML = found.map((x,i) => `<li><button type="button" data-i="${i}"><b>${esc(x.trackName)} · ${esc(x.artistName)}</b>
+    <span>${esc(x.albumName || "")}${x.duration ? ` · ${fmt(x.duration)}` : ""} · ${x.syncedLyrics ? "ya sincronizada" : "sin tiempos (la sincronizas tú)"}</span></button></li>`).join("");
+  ul.hidden = false;
+};
+$("#findList").addEventListener("click", e => {
+  const b = e.target.closest("button[data-i]"); if (!b) return;
+  const x = found[+b.dataset.i];
+  $("#fLyrics").value = (x.syncedLyrics || x.plainLyrics || "").trim();
+  if (!$("#fArtist").value) $("#fArtist").value = x.artistName || "";
+  $("#findList").hidden = true;
+  $("#findMsg").textContent = x.syncedLyrics ? "Listo, ya viene sincronizada. Escúchala para confirmar que coincide con tu audio." : "Listo. Ahora toca Sincronizar letra.";
+});
+
+/* Traducción automática verso por verso (MyMemory, gratis). Revísala antes de dedicar. */
+$("#bTrans").onclick = async () => {
+  const lines = parseLyrics($("#fLyrics").value).map(l => l.text), m = $("#transMsg"), btn = $("#bTrans");
+  if (!lines.length) { m.textContent = "Primero pon la letra."; return; }
+  const lang = $("#fLang").value, cache = new Map(), out = new Array(lines.length);
+  btn.disabled = true;
+  let done = 0, failed = false;
+  const one = async t => {
+    if (t === "♪" || !/\p{L}/u.test(t)) return t;
+    if (cache.has(t)) return cache.get(t);
+    const p = fetch(`https://api.mymemory.translated.net/get?${new URLSearchParams({ q: t.slice(0, 480), langpair: `${lang}|es` })}`)
+      .then(r => r.json()).then(j => {
+        const tx = j && j.responseData && j.responseData.translatedText;
+        if (!tx || j.responseStatus == 429 || /MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(tx)) throw 0;
+        const el = document.createElement("textarea"); el.innerHTML = tx; return el.value;
+      });
+    cache.set(t, p); return p;
+  };
+  const queue = lines.map((t,i) => [t,i]);
+  const worker = async () => { while (queue.length && !failed) { const [t,i] = queue.shift();
+    try { out[i] = await one(t); } catch { failed = true; } m.textContent = `Traduciendo… ${++done} de ${lines.length}`; } };
+  await Promise.all([worker(), worker(), worker()]);
+  btn.disabled = false;
+  if (failed) { m.textContent = "El traductor gratuito llegó a su límite por hoy o no respondió. Inténtalo más tarde o escribe la traducción tú."; return; }
+  $("#fTrans").value = out.join("\n");
+  m.textContent = "Traducción lista. Revísala: los traductores automáticos fallan con frases poéticas y modismos.";
+};
+$("#fTrans").addEventListener("input", () => {
+  const a = parseLyrics($("#fLyrics").value).length, b = trLines($("#fTrans").value).length;
+  $("#transMsg").textContent = b && a !== b ? `La letra tiene ${a} versos y la traducción ${b} renglones. Deben coincidir para que cada traducción quede bajo su verso.` : "";
+});
+
+/* Sincronizar tocando */
+const eAudio = new Audio();
+$("#bSync").onclick = () => {
+  const texts = parseLyrics($("#fLyrics").value).map(l => l.text);
+  if (!texts.length) { $("#fLyrics").focus(); return msg("Primero pega la letra, un verso por renglón.", "err"); }
+  const url = E.audioBlob ? URL.createObjectURL(E.audioBlob) : (E.keptAudio || null);
+  E.sync = { texts, times: [], url, clock: url ? audioClock(eAudio, url) : virtualClock(0), raf: 0 };
+  $("#syncBox").hidden = false; $("#edButtons").hidden = true; msg("");
+  $("#sHint").textContent = url ? "Toca \"Marcar verso\" justo cuando empiece cada verso. Si te equivocas, Deshacer regresa la canción al verso anterior."
+    : "No hay audio, así que corre un cronómetro: pon la canción en Spotify o YouTube al mismo tiempo y marca cada verso. Después puedes agregar el audio y la letra sigue sincronizada.";
+  E.sync.clock.seek(0); E.sync.clock.play();
+  renderSync(); syncTick(); $("#sMark").focus();
+};
+function renderSync(){
+  const z = E.sync, i = z.times.length;
+  $("#sPrev").textContent = i > 0 ? z.texts[i-1] : "";
+  $("#sCur").textContent = i < z.texts.length ? z.texts[i] : "Listo, todos los versos tienen su tiempo.";
+  $("#sCount").textContent = `${Math.min(i, z.texts.length)} de ${z.texts.length}`;
+  $("#sMark").textContent = i < z.texts.length ? "Marcar verso" : "Terminar";
+}
+function syncTick(){ if (!E.sync) return; $("#sClock").textContent = fmt(E.sync.clock.time(), true); E.sync.raf = requestAnimationFrame(syncTick); }
+function endSync(apply){
+  const z = E.sync; if (!z) return;
+  cancelAnimationFrame(z.raf); z.clock.stop(); if (z.url && z.url.startsWith("blob:")) URL.revokeObjectURL(z.url);
+  if (apply) {
+    $("#fLyrics").value = z.texts.map((t,i) => z.times[i] != null ? `[${lrcTime(z.times[i])}]${t}` : t).join("\n");
+    msg(z.times.length === z.texts.length ? "Letra sincronizada. Ya puedes dedicársela." : "Se aplicaron los versos que marcaste.", "ok");
+  }
+  E.sync = null; $("#syncBox").hidden = true; $("#edButtons").hidden = false;
+}
+$("#sMark").onclick = () => { const z = E.sync; if (!z) return;
+  if (z.times.length >= z.texts.length) return endSync(true);
+  z.times.push(Math.max(0, z.clock.time() - 0.15)); renderSync(); };
+$("#sUndo").onclick = () => { const z = E.sync; if (!z || !z.times.length) return; z.times.pop();
+  z.clock.seek(Math.max(0, (z.times[z.times.length-1] ?? 0))); renderSync(); };
+$("#sRestart").onclick = () => { const z = E.sync; if (!z) return; z.times = []; z.clock.seek(0); z.clock.play(); renderSync(); };
+$("#sCancel").onclick = () => endSync(false);
+document.addEventListener("keydown", e => {
+  if (E.sync && (e.code === "Space" || e.code === "Enter") && !/TEXTAREA|INPUT/.test(e.target.tagName)) { e.preventDefault(); $("#sMark").click(); }
+});
+
+/* ---------- Ajustes de conexión ---------- */
+function fillCfg(){ const c = cfg() || {}; $("#cOwner").value = c.owner || ""; $("#cRepo").value = c.repo || "canciones-para-anahi"; $("#cBranch").value = c.branch || "main"; $("#cToken").value = c.token || ""; }
+$("#cfgForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const c = { owner: $("#cOwner").value.trim(), repo: $("#cRepo").value.trim(), branch: $("#cBranch").value.trim() || "main", token: $("#cToken").value.trim() };
+  const m = $("#cMsg");
+  if (!c.owner || !c.repo || !c.token) { m.className = "msg err"; m.textContent = "Llena usuario, repositorio y token."; return; }
+  const before = cfg(); ls.set("anahi-cfg", c);
+  m.className = "msg"; m.textContent = "Probando…";
+  try {
+    const info = await gh("");
+    if (!info.permissions || !info.permissions.push) throw Object.assign(new Error(), { status: 403 });
+    m.className = "msg ok"; m.textContent = "Conectado. Ya puedes dedicarle canciones desde este dispositivo.";
+    applyMode(); await refresh();
+  } catch (err) {
+    if (before) ls.set("anahi-cfg", before); else ls.del("anahi-cfg");
+    m.className = "msg err"; m.textContent = ghError(err);
+  }
+});
+$("#cLogout").onclick = async () => { ls.del("anahi-cfg"); fillCfg(); applyMode(); $("#cMsg").className = "msg ok"; $("#cMsg").textContent = "Listo. Este dispositivo ya solo recibe canciones."; await refresh(); };
+$("#goSettings").onclick = () => { location.hash = "ajustes"; };
+
+/* ---------- Navegación ---------- */
+function applyMode(){ $("#tabDedicar").hidden = !isAdmin(); }
+function route(){
+  let v = (location.hash || "#hoy").slice(1);
+  if (v === "admin") v = "ajustes";
+  if (v === "dedicar" && !isAdmin()) v = "ajustes";
+  const views = ["hoy","dedicatorias","dedicar","ajustes"];
+  if (!views.includes(v)) v = "hoy";
+  for (const n of views) $("#v-" + n).hidden = n !== v;
+  if (v === "ajustes") fillCfg();
+  document.querySelectorAll(".tabs a").forEach(a => a.dataset.v === v ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current"));
+  window.scrollTo(0, 0);
+}
+addEventListener("hashchange", route);
+applyMode(); resetEditor(); route(); refresh();
+
+// Cambia sola a medianoche y busca dedicatorias nuevas al volver a abrir la app.
+let lastDay = today();
+setInterval(() => { if (today() !== lastDay) { lastDay = today(); renderToday(); renderList(); } }, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { lastDay = today(); refresh(); } });
+/*SW-START*/
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {});
+/*SW-END*/
+})();
+</script>
+<!--PAGE-END-->
+</body>
+</html>

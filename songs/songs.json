@@ -1,0 +1,14 @@
+{
+  "songs": [
+    {
+      "id": "0000-muestra",
+      "title": "Canción de muestra",
+      "artist": "Para Anahí",
+      "dedication": "Así se verá cada canción que te dedique",
+      "color": "#8e2453",
+      "audio": null,
+      "lyrics": "[00:01.00]Esta es una canción de muestra\n[00:04.60]para ver cómo avanza la letra\n[00:08.20]cada verso se enciende a su tiempo\n[00:11.80]como tu nombre en mi pensamiento\n[00:15.80]Toca cualquier línea para saltar\n[00:19.40]y pronto habrá canciones de verdad\n[00:23.20]♪",
+      "date": null
+    }
+  ]
+}
