@@ -1,6 +1,6 @@
 # Canciones para Anahí ❤️
 
-Web app para el iPhone de Anahí: recibe las canciones que le dedicas, con la letra sincronizada, un mensaje tuyo escrito a mano y una canción del día que también aparece en un widget.
+Web app para el iPhone de Anahí (también se ve bien en tableta y computadora): recibe las canciones que le dedicas, con la letra sincronizada, un mensaje tuyo escrito a mano y una canción del día que también aparece en un widget.
 
 ## Cómo funciona
 
@@ -41,6 +41,7 @@ Desde **Dedicatorias → ⋯** puedes editar o quitar las que ya publicaste.
 ## 4. En el iPhone de Anahí
 
 - **Instalar la app**: abre el enlace en Safari → Compartir → **Agregar a pantalla de inicio**.
+- **Escuchar sin internet**: en **Dedicatorias** puede tocar el botón de descarga de cada canción o **Descargar todas**. Las descargadas llevan una palomita y se escuchan aunque no tenga señal. Las canciones nuevas que le dedicas se descargan solas al abrir la app con internet (se puede apagar ahí mismo).
 - **Widget**: instala **Scriptable** (gratis en la App Store), crea un script nuevo con el contenido de `widget/cancion-del-dia-scriptable.js`, cambia `BASE` por tu dirección y agrega un widget de Scriptable (chico o mediano) eligiendo ese script. Muestra la canción de hoy con su color y tu mensaje, dice "NUEVA PARA TI" el día que le dedicas una, y abre la app al tocarlo. iOS decide cada cuánto se actualiza (normalmente cada 15 a 60 minutos).
 
 ## Archivos
