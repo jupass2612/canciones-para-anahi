@@ -37,11 +37,12 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%}
+html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);-webkit-tap-highlight-color:transparent}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
-.wrap{max-width:560px;margin:0 auto;padding-inline:18px;padding-block:20px calc(96px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:560px;margin:0 auto;padding-inline:18px;padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(96px + env(safe-area-inset-bottom,0px))}
 .brand{display:flex;align-items:center;gap:10px;margin-bottom:22px}
 .brand svg{width:26px;height:26px;flex:none;color:var(--accent)}
 .brand h1{margin:0;font:400 1.55rem/1 var(--f-display);letter-spacing:.005em}
@@ -138,16 +139,17 @@ ol.steps b{color:var(--ink)}
 .tabs a[aria-current=page]{color:var(--accent)}
 
 /* Reproductor */
-.player{position:fixed;inset:0;z-index:10;display:grid;grid-template-rows:auto 1fr auto;color:#fff;
+.player{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;height:100lvh;z-index:10;display:grid;grid-template-rows:auto minmax(0,1fr) auto;color:#fff;overflow:hidden;
   background:linear-gradient(170deg, color-mix(in oklab,var(--song) 80%, #000) 0%, color-mix(in oklab,var(--song) 35%, #0b0308) 75%);
   padding:calc(12px + env(safe-area-inset-top,0px)) 0 calc(14px + env(safe-area-inset-bottom,0px))}
-.ptop{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding-inline:14px}
+.ptop{display:grid;grid-template-columns:96px minmax(0,1fr) 96px;gap:8px;align-items:center;padding-inline:14px}
+.pright{display:flex;gap:6px;justify-content:flex-end}
 .ptop .ttl{min-width:0;text-align:center}
 .ptop .ttl b{display:block;font:italic 400 1.25rem/1.15 var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ptop .ttl span{font-size:.8rem;opacity:.75}
 .ibtn{border:0;background:rgba(255,255,255,.12);color:#fff;width:42px;height:42px;border-radius:50%;display:grid;place-items:center}
 .ibtn svg{width:20px;height:20px}
-.lyrics{overflow-y:auto;padding:28vh 26px 40vh;mask-image:linear-gradient(transparent 0,#000 18%,#000 78%,transparent 100%);-webkit-mask-image:linear-gradient(transparent 0,#000 18%,#000 78%,transparent 100%)}
+.lyrics{min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:22vh 26px 30vh;mask-image:linear-gradient(transparent 0,#000 18%,#000 78%,transparent 100%);-webkit-mask-image:linear-gradient(transparent 0,#000 18%,#000 78%,transparent 100%)}
 .lyrics .ded{font:500 1.7rem/1.2 var(--f-hand);opacity:.95;margin:0 0 28px}
 .ln{display:block;width:100%;text-align:left;border:0;background:none;color:inherit;padding:8px 0;
   font:400 1.45rem/1.25 var(--f-display);opacity:.38;transition:opacity .35s, transform .35s;transform-origin:left center}
@@ -164,9 +166,9 @@ ol.steps b{color:var(--ink)}
 .results span{font-size:.82rem;color:var(--muted)}
 select{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
 .pnote{font-size:.85rem;opacity:.75;margin:0 0 18px}
-.pbottom{padding-inline:22px;display:grid;gap:10px;max-width:560px;width:100%;margin:0 auto}
+.pbottom{position:relative;z-index:2;padding-inline:22px;padding-top:10px;display:grid;gap:10px;max-width:560px;width:100%;margin:0 auto}
 .times{display:flex;justify-content:space-between;font-size:.75rem;opacity:.75;font-variant-numeric:tabular-nums}
-input[type=range]{width:100%;accent-color:#fff}
+input[type=range]{width:100%;accent-color:#fff;height:32px;margin:0;touch-action:none;cursor:pointer}
 .pctl{display:flex;justify-content:center;align-items:center;gap:22px}
 .play{width:66px;height:66px;border-radius:50%;border:0;background:#fff;color:#2b1220;display:grid;place-items:center}
 .play svg{width:28px;height:28px}
@@ -188,9 +190,29 @@ input[type=range]{width:100%;accent-color:#fff}
 .pwarn{margin:0;text-align:center;font-size:.85rem;opacity:.85}
 .recent h3{margin-top:26px}
 
+/* Spotify */
+.todaybtns{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ghostbtn{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;border-radius:999px;padding:11px 16px;font-weight:600}
+.ghostbtn svg,.spbtn svg{width:20px;height:20px}
+.spbtn{border:0;background:rgba(255,255,255,.12);color:#fff;width:42px;height:42px;border-radius:50%;display:grid;place-items:center}
+.sheet{position:fixed;inset:0;z-index:30;background:rgba(12,4,9,.55);display:grid;align-items:end}
+.sheet>div{background:var(--surface);color:var(--ink);border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom,0px));max-width:560px;width:100%;margin:0 auto;display:grid;gap:12px}
+.sheet h2{font-size:1.6rem;margin:0}
+.opt{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;text-align:left;width:100%;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:12px}
+.opt i{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:color-mix(in oklab,var(--accent) 14%,transparent);color:var(--accent)}
+.opt i svg{width:22px;height:22px}
+.opt b{display:block}
+.opt span{font-size:.84rem;color:var(--muted)}
+.opt:disabled{opacity:.5}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;font-size:.9rem;max-width:min(92vw,460px);box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;gap:12px;align-items:center}
+.toast a{color:inherit;font-weight:700}
+.spbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 14px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.spbar .hint{flex:1 1 200px}
+code.url{display:block;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);font-size:.82rem;word-break:break-all;user-select:all}
+
 /* Responsivo: tableta y computadora */
 @media (min-width:760px){
-  .wrap{max-width:1000px;padding-inline:32px;padding-block:32px calc(110px + env(safe-area-inset-bottom,0px))}
+  .wrap{max-width:1000px;padding-inline:32px;padding-block:calc(32px + env(safe-area-inset-top,0px)) calc(110px + env(safe-area-inset-bottom,0px))}
   .brand h1{font-size:2rem}
   .brand svg{width:32px;height:32px}
   .hoygrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:start}
@@ -237,6 +259,8 @@ input[type=range]{width:100%;accent-color:#fff}
   <symbol id="i-pen" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 20l1-4.5L15.5 5a2.1 2.1 0 0 1 3 0l.5.5a2.1 2.1 0 0 1 0 3L8.5 19 4 20z"/></symbol>
   <symbol id="i-dl" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-addlist" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" d="M4 6h11M4 11h11M4 16h7M18 13v8M14 17h8"/></symbol>
+  <symbol id="i-heart-o" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M12 20s-7-4.3-9-8.7C1.6 8 3.6 5 6.8 5c2 0 3.4 1.1 4.2 2.4.8-1.3 2.2-2.4 4.2-2.4 3.2 0 5.2 3 3.8 6.3C19 15.7 12 20 12 20z"/></symbol>
   <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></symbol>
 </svg>
 
@@ -272,6 +296,10 @@ input[type=range]{width:100%;accent-color:#fff}
       <button type="button" class="btn" id="dlAll">Descargar todas</button>
       <label class="switch"><input type="checkbox" id="autoDl"> Descargar automáticamente las canciones nuevas</label>
     </div>
+    <div class="spbar" id="spBar" hidden>
+      <span class="hint">Pasa todas tus canciones a Spotify.</span>
+      <button type="button" class="btn" id="spAll">Agregar todas a Spotify</button>
+    </div>
     <ul class="list" id="songList"></ul>
   </section>
 
@@ -300,6 +328,9 @@ input[type=range]{width:100%;accent-color:#fff}
           <div class="swatches" id="swatches"></div>
         </div>
       </div>
+      <label>Enlace de Spotify <small>Opcional. En Spotify: ⋯ → Compartir → Copiar enlace. Así se agrega exactamente esa versión. Si lo dejas vacío, se busca por título y artista.</small>
+        <input type="text" id="fSpotify" autocomplete="off" autocapitalize="off" inputmode="url" placeholder="https://open.spotify.com/track/…">
+      </label>
       <label>Audio <small id="audioNow">MP3 o M4A desde tu iPhone (app Archivos).</small>
         <input type="file" id="fAudio" accept="audio/*,.mp3,.m4a">
       </label>
@@ -380,8 +411,41 @@ input[type=range]{width:100%;accent-color:#fff}
         <p class="msg" id="cMsg" role="status" aria-live="polite"></p>
       </form>
     </div>
+
+    <h2 style="margin-top:34px">Spotify</h2>
+    <div class="card">
+      <p class="hint">Para que Anahí pueda guardar las canciones en su Spotify. Se configura una vez. Tu cuenta de Spotify necesita Premium y puedes registrar hasta 5 personas.</p>
+      <ol class="steps">
+        <li>Entra a <b>developer.spotify.com/dashboard</b> → <b>Create app</b>. Nombre: el que quieras.</li>
+        <li>En <b>Redirect URIs</b> pega exactamente esta dirección:<code class="url" id="spUri"></code></li>
+        <li>En "Which API/SDKs are you planning to use?" marca <b>Web API</b> y guarda.</li>
+        <li>En <b>User Management</b> agrega el nombre y el correo de la cuenta de Spotify de Anahí.</li>
+        <li>Copia el <b>Client ID</b> de la app y pégalo aquí.</li>
+      </ol>
+      <form id="spForm" novalidate>
+        <label>Client ID de Spotify<input type="text" id="spCid" autocomplete="off" autocapitalize="off" placeholder="32 letras y números"></label>
+        <div class="row"><button type="submit" class="btn primary">Guardar para Anahí</button></div>
+        <p class="msg" id="spMsg" role="status" aria-live="polite"></p>
+      </form>
+    </div>
   </section>
 </main>
+
+<div class="sheet" id="spSheet" hidden>
+  <div role="dialog" aria-modal="true" aria-labelledby="spTitle">
+    <p class="eyebrow">Spotify</p>
+    <h2 id="spTitle">Agregar a Spotify</h2>
+    <p class="hint" id="spWhat"></p>
+    <button class="opt" id="spLiked" type="button"><i><svg><use href="#i-heart-o"/></svg></i><span><b>Tus me gusta</b><span>Se guarda en "Canciones que te gustan".</span></span></button>
+    <button class="opt" id="spList" type="button"><i><svg><use href="#i-addlist"/></svg></i><span><b>Playlist "Dedicatorias"</b><span>Si no existe, se crea en tu cuenta (privada).</span></span></button>
+    <p class="hint" id="spNote"></p>
+    <div class="row" style="justify-content:space-between">
+      <button class="link" id="spOut" type="button" hidden>Desconectar Spotify</button>
+      <button class="btn" id="spClose" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <nav class="tabs" aria-label="Secciones">
   <a href="#hoy" data-v="hoy"><svg><use href="#i-sun"/></svg>Hoy</a>
@@ -394,7 +458,10 @@ input[type=range]{width:100%;accent-color:#fff}
   <div class="ptop">
     <button class="ibtn" id="pClose" aria-label="Cerrar reproductor"><svg><use href="#i-down"/></svg></button>
     <div class="ttl"><b id="pTitle"></b><span id="pArtist"></span></div>
-    <button class="trbtn" id="pTr" aria-pressed="true" aria-label="Mostrar traducción" hidden>ES</button>
+    <span class="pright">
+      <button class="trbtn" id="pTr" aria-pressed="true" aria-label="Mostrar traducción" hidden>ES</button>
+      <button class="spbtn" id="pSp" aria-label="Agregar esta canción a Spotify" hidden><svg><use href="#i-addlist"/></svg></button>
+    </span>
   </div>
   <div class="lyrics" id="pLyrics"></div>
   <div class="pbottom">
@@ -535,7 +602,7 @@ async function refresh(reloadSongs = true){
   if (reloadSongs) S.songs = await loadSongs();
   S.offline = new Map(await audioIndex());
   if (isAdmin()) S.drafts = (await draftsAll()).map(d => ({ ...withLines(d), draft: true }));
-  renderToday(); renderList(); renderDrafts(); renderOffline();
+  renderToday(); renderList(); renderDrafts(); renderOffline(); renderSpotify();
   autoDownload();
 }
 const byId = (a,b) => String(a.id).localeCompare(String(b.id));
@@ -623,6 +690,136 @@ function setOnline(){ const off = !navigator.onLine; document.querySelectorAll("
 addEventListener("online", () => { setOnline(); autoDownload(); });
 addEventListener("offline", setOnline);
 
+/* ---------- Spotify (inicio de sesión PKCE, sin servidor) ---------- */
+const SP = { cid: null };
+const SP_SCOPES = "user-library-modify playlist-modify-private playlist-modify-public playlist-read-private";
+const spRedirect = () => location.origin + location.pathname;
+const spTok = () => ls.get("anahi-sp", null);
+const spParse = v => { const m = String(v||"").match(/track[/:]([A-Za-z0-9]{22})/); return m ? `spotify:track:${m[1]}` : null; };
+const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+let toastT = 0;
+function toast(html, keep){ const t = $("#toast"); t.innerHTML = html; t.hidden = false; clearTimeout(toastT); if (!keep) toastT = setTimeout(() => t.hidden = true, 5200); }
+async function loadConfig(){
+  try { const r = await fetch(`config.json?v=${Date.now()}`, { cache: "no-store" }); if (r.ok) SP.cid = (await r.json()).spotifyClientId || null; } catch {}
+  if (!SP.cid) SP.cid = ls.get("anahi-sp-cid", null); else ls.set("anahi-sp-cid", SP.cid);
+}
+async function spLogin(pending){
+  const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
+  const challenge = b64url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)));
+  const state = b64url(crypto.getRandomValues(new Uint8Array(12)));
+  ls.set("anahi-sp-pkce", { verifier, state, pending, hash: location.hash || "#hoy" });
+  location.href = "https://accounts.spotify.com/authorize?" + new URLSearchParams({ client_id: SP.cid, response_type: "code", redirect_uri: spRedirect(), code_challenge_method: "S256", code_challenge: challenge, scope: SP_SCOPES, state });
+}
+async function spTokenReq(body){
+  const r = await fetch("https://accounts.spotify.com/api/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: SP.cid, ...body }) });
+  if (!r.ok) throw Object.assign(new Error("token"), { status: r.status });
+  const j = await r.json(), prev = spTok() || {};
+  const t = { access: j.access_token, refresh: j.refresh_token || prev.refresh, exp: Date.now() + (j.expires_in - 60) * 1000 };
+  ls.set("anahi-sp", t); return t;
+}
+async function spHandleRedirect(){
+  const q = new URLSearchParams(location.search), code = q.get("code"), err = q.get("error");
+  if (!code && !err) return;
+  const pk = ls.get("anahi-sp-pkce", null); ls.del("anahi-sp-pkce");
+  history.replaceState(null, "", spRedirect() + (pk?.hash || "#hoy")); route();
+  if (err || !pk || q.get("state") !== pk.state) { toast(err === "access_denied" ? "No se conectó Spotify." : "No se pudo conectar Spotify. Inténtalo de nuevo."); return; }
+  try { await spTokenReq({ grant_type: "authorization_code", code, redirect_uri: spRedirect(), code_verifier: pk.verifier }); }
+  catch { toast("No se pudo conectar Spotify. Inténtalo de nuevo."); return; }
+  if (pk.pending) spRun(pk.pending);
+}
+async function spAccess(force){
+  let t = spTok(); if (!t) return null;
+  if (force || Date.now() > t.exp) { try { t = await spTokenReq({ grant_type: "refresh_token", refresh_token: t.refresh }); } catch { ls.del("anahi-sp"); return null; } }
+  return t.access;
+}
+async function spApi(path, opts = {}, retried){
+  const tok = await spAccess(retried); if (!tok) throw Object.assign(new Error(), { relogin: true });
+  let r;
+  try { r = await fetch("https://api.spotify.com/v1" + path, { method: opts.method || "GET", headers: { Authorization: `Bearer ${tok}`, ...(opts.body ? { "Content-Type": "application/json" } : {}) }, body: opts.body ? JSON.stringify(opts.body) : undefined }); }
+  catch { throw Object.assign(new Error(), { status: -1 }); }
+  if (r.status === 401 && !retried) return spApi(path, opts, true);
+  if (r.status === 401) { ls.del("anahi-sp"); throw Object.assign(new Error(), { relogin: true }); }
+  if (!r.ok) throw Object.assign(new Error(), { status: r.status });
+  const txt = await r.text(); return txt ? JSON.parse(txt) : null;
+}
+async function spTrackUri(s){
+  if (s.spotify) return s.spotify;
+  const map = ls.get("anahi-sp-map", {}); if (map[s.id]) return map[s.id];
+  const mainArtist = (s.artist || "").split(/,| ft\.? | feat\.? | & | x | y /i)[0].trim();
+  const find = async q => (await spApi(`/search?${new URLSearchParams({ q, type: "track", limit: "5" })}`))?.tracks?.items?.[0];
+  const it = await find(`track:${s.title} artist:${mainArtist}`) || await find(`${s.title} ${mainArtist}`);
+  if (!it) return null;
+  map[s.id] = it.uri; ls.set("anahi-sp-map", map); return it.uri;
+}
+async function spPlaylist(){
+  const saved = ls.get("anahi-sp-pl", null); if (saved) return saved;
+  const me = await spApi("/me");
+  let url = "/me/playlists?limit=50", found = null;
+  while (url && !found) {
+    const j = await spApi(url);
+    found = (j.items || []).find(p => p && p.name === "Dedicatorias" && p.owner && p.owner.id === me.id);
+    url = j.next ? j.next.replace("https://api.spotify.com/v1", "") : null;
+  }
+  if (!found) found = await spApi("/me/playlists", { method: "POST", body: { name: "Dedicatorias", public: false, description: "Canciones que me dedicaron ❤" } });
+  ls.set("anahi-sp-pl", found.id); ls.del("anahi-sp-added"); return found.id;
+}
+async function spRun(p){
+  if (!SP.cid) return toast("Spotify todavía no está configurado.");
+  if (!navigator.onLine) return toast("Necesitas internet para agregar canciones a Spotify.");
+  if (!spTok()) return spLogin(p);
+  const songs = p.ids.map(id => S.songs.find(x => x.id === id)).filter(Boolean);
+  if (!songs.length) return;
+  toast("Agregando a Spotify…", true);
+  try {
+    const uris = [], missing = [];
+    for (const x of songs) { const u = await spTrackUri(x); u ? uris.push(u) : missing.push(x.title); }
+    let added = uris.length;
+    if (uris.length && p.kind === "liked") {
+      for (let i = 0; i < uris.length; i += 40) await spApi(`/me/library?${new URLSearchParams({ uris: uris.slice(i, i + 40).join(",") })}`, { method: "PUT" });
+    } else if (uris.length) {
+      const pl = await spPlaylist(), done = new Set(ls.get("anahi-sp-added", []));
+      const fresh = uris.filter(u => !done.has(u)); added = fresh.length;
+      for (let i = 0; i < fresh.length; i += 100) await spApi(`/playlists/${pl}/items`, { method: "POST", body: { uris: fresh.slice(i, i + 100) } });
+      fresh.forEach(u => done.add(u)); ls.set("anahi-sp-added", [...done]);
+    }
+    const where = p.kind === "liked" ? "tus me gusta" : "tu playlist Dedicatorias";
+    const one = songs.length === 1 && uris.length === 1;
+    let msgTxt = !uris.length ? `No encontré ${songs.length === 1 ? "esta canción" : "estas canciones"} en Spotify.`
+      : added === 0 ? `Ya ${uris.length === 1 ? "estaba" : "estaban"} en ${where}.`
+      : one ? `Lista, quedó en ${where}.` : `Listo: ${added} ${added === 1 ? "canción agregada" : "canciones agregadas"} a ${where}.`;
+    if (missing.length && uris.length) msgTxt += ` No encontré: ${missing.slice(0, 3).join(", ")}${missing.length > 3 ? "…" : ""}.`;
+    const link = one ? ` <a href="https://open.spotify.com/track/${uris[0].split(":").pop()}" target="_blank" rel="noopener">Abrir</a>` : "";
+    toast(esc(msgTxt) + link);
+  } catch (e) {
+    if (e.relogin) return spLogin(p);
+    if (e.status === 403) toast("Spotify no dio permiso a esta cuenta. Hay que agregar tu correo de Spotify en la app de desarrollador (User Management).");
+    else if (e.status === 404 && p.kind === "playlist") { ls.del("anahi-sp-pl"); toast("No encontré la playlist Dedicatorias. Vuelve a intentarlo y se creará otra vez."); }
+    else if (e.status === 429) toast("Spotify pidió esperar un momento. Inténtalo en un minuto.");
+    else toast(e.status === -1 ? "No hay conexión con Spotify. Revisa tu internet." : "No se pudo agregar a Spotify. Inténtalo de nuevo.");
+  }
+}
+let spIds = [];
+function openSpSheet(ids){
+  spIds = ids;
+  const one = ids.length === 1 ? S.songs.find(x => x.id === ids[0]) : null;
+  $("#spWhat").textContent = one ? `${one.title}${one.artist ? " · " + one.artist : ""}` : `${ids.length} canciones`;
+  $("#spNote").textContent = spTok() ? "" : "La primera vez te pedirá entrar a tu cuenta de Spotify.";
+  $("#spOut").hidden = !spTok();
+  $("#spSheet").hidden = false; $("#spLiked").focus();
+}
+const closeSp = () => { $("#spSheet").hidden = true; };
+$("#spLiked").onclick = () => { closeSp(); spRun({ kind: "liked", ids: spIds }); };
+$("#spList").onclick = () => { closeSp(); spRun({ kind: "playlist", ids: spIds }); };
+$("#spClose").onclick = closeSp;
+$("#spSheet").addEventListener("click", e => { if (e.target.id === "spSheet") closeSp(); });
+$("#spOut").onclick = () => { ["anahi-sp", "anahi-sp-pl", "anahi-sp-added", "anahi-sp-map"].forEach(k => ls.del(k)); closeSp(); toast("Spotify desconectado de este dispositivo."); };
+$("#pSp").onclick = () => P.song && openSpSheet([P.song.id]);
+$("#spAll").onclick = () => openSpSheet(herOrder().filter(x => x.id !== DEMO.id).map(x => x.id));
+function renderSpotify(){
+  const list = herOrder().filter(x => x.id !== DEMO.id);
+  $("#spBar").hidden = !SP.cid || list.length < 2;
+}
+
 /* ---------- Vistas ---------- */
 function renderToday(){
   $("#adminBanner").hidden = !isAdmin();
@@ -643,9 +840,13 @@ function renderToday(){
       <div class="a">${esc(s.artist||"")}</div>
       ${s.dedication ? `<div class="ded">${esc(s.dedication)}</div>` : ""}
       ${first ? `<div class="preview">${esc(first.text)}</div>` : ""}
-      <button class="bigplay" id="playToday"><svg><use href="#i-play"/></svg>Escuchar con la letra</button>
+      <div class="todaybtns">
+        <button class="bigplay" id="playToday"><svg><use href="#i-play"/></svg>Escuchar con la letra</button>
+        ${SP.cid ? `<button class="ghostbtn" id="spToday"><svg><use href="#i-addlist"/></svg>Spotify</button>` : ""}
+      </div>
     </article>`;
   $("#playToday").onclick = () => openPlayer(s, herOrder());
+  if ($("#spToday")) $("#spToday").onclick = () => openSpSheet([s.id]);
   const n = visible().filter(x => x.id !== DEMO.id).length;
   $("#countLine").innerHTML = n ? `Llevas <b>${n}</b> ${n === 1 ? "canción dedicada" : "canciones dedicadas"}.` : "";
   renderRecent();
@@ -778,6 +979,7 @@ async function openPlayer(s, queue){
     + (s.lines.length ? s.lines.map((l,i) => `<button class="ln" data-i="${i}">${esc(l.text)}${s.tr && s.tr[i] && s.tr[i] !== l.text ? `<span class="tr">${esc(s.tr[i])}</span>` : ""}</button>`).join("") : `<p class="pnote">Esta canción no tiene letra todavía.</p>`);
   const hasTr = !!(s.tr && s.tr.length);
   $("#pTr").hidden = !hasTr; applyTr();
+  $("#pSp").hidden = !SP.cid || s.draft || s.id === DEMO.id;
   P.els = [...box.querySelectorAll(".ln")]; box.scrollTop = 0;
   P.url = s.audioBlob ? URL.createObjectURL(s.audioBlob) : rec && rec.blob ? URL.createObjectURL(rec.blob) : (s.audio || null);
   const lastT = synced ? s.lines[s.lines.length-1].t : 0;
@@ -861,7 +1063,7 @@ function startEdit(s, isDraft){
   E.audioBlob = s.audioBlob || null; E.audioName = s.audioName || null;
   E.keptAudio = isDraft ? (s.keptAudio || null) : (s.audio || null);
   $("#fTitle").value = s.title || ""; $("#fArtist").value = s.artist || ""; $("#fDed").value = s.dedication || "";
-  $("#fDate").value = s.date || today(); $("#fLyrics").value = toLRC(s.lines); $("#fTrans").value = s.translation || "";
+  $("#fDate").value = s.date || today(); $("#fLyrics").value = toLRC(s.lines); $("#fTrans").value = s.translation || ""; $("#fSpotify").value = s.spotify ? `https://open.spotify.com/track/${s.spotify.split(":").pop()}` : "";
   const r = [...sw.querySelectorAll("input")].find(i => i.value === s.color); if (r) r.checked = true;
   $("#edEyebrow").textContent = E.publishedId ? "Editando dedicatoria" : "Borrador";
   $("#edTitle").textContent = s.title || "Sin título";
@@ -870,7 +1072,8 @@ function startEdit(s, isDraft){
 function formSong(){
   return { title: $("#fTitle").value.trim(), artist: $("#fArtist").value.trim(), dedication: $("#fDed").value.trim(),
     color: (sw.querySelector("input:checked") || {}).value || COLORS[0][1], date: $("#fDate").value || today(),
-    lyrics: toLRC(parseLyrics($("#fLyrics").value)), translation: trLines($("#fTrans").value).join("\n") };
+    lyrics: toLRC(parseLyrics($("#fLyrics").value)), translation: trLines($("#fTrans").value).join("\n"),
+    spotify: spParse($("#fSpotify").value) };
 }
 $("#fAudio").addEventListener("change", e => {
   const f = e.target.files[0]; if (!f) return;
@@ -911,7 +1114,7 @@ $("#editor").addEventListener("submit", async e => {
       if (audio && audio !== newPath) files.push({ path: audio, remove: true });
       audio = newPath;
     }
-    const entry = { id, title: f.title, artist: f.artist, dedication: f.dedication, color: f.color, date: f.date, audio, lyrics: f.lyrics, ...(f.translation ? { translation: f.translation } : {}) };
+    const entry = { id, title: f.title, artist: f.artist, dedication: f.dedication, color: f.color, date: f.date, audio, lyrics: f.lyrics, ...(f.translation ? { translation: f.translation } : {}), ...(f.spotify ? { spotify: f.spotify } : {}) };
     const next = prev ? remote.map(x => x.id === id ? entry : x) : [...remote, entry];
     files.push(songsFile(next));
     await commit(files, `${prev ? "Editar" : "Dedicar"}: ${f.title}`, label => msg(`${label}…`));
@@ -1047,6 +1250,18 @@ $("#cfgForm").addEventListener("submit", async e => {
 });
 $("#cLogout").onclick = async () => { ls.del("anahi-cfg"); fillCfg(); applyMode(); $("#cMsg").className = "msg ok"; $("#cMsg").textContent = "Listo. Este dispositivo ya solo recibe canciones."; await refresh(); };
 $("#goSettings").onclick = () => { location.hash = "ajustes"; };
+$("#spForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const cid = $("#spCid").value.trim(), m = $("#spMsg");
+  if (!/^[a-f0-9]{32}$/i.test(cid)) { m.className = "msg err"; m.textContent = "El Client ID son 32 letras y números. Cópialo de la página de tu app en Spotify."; return; }
+  if (!isAdmin()) { m.className = "msg err"; m.textContent = "Primero configura la conexión para publicar (arriba)."; return; }
+  m.className = "msg"; m.textContent = "Guardando…";
+  try {
+    await commit([{ path: "config.json", content: JSON.stringify({ spotifyClientId: cid }, null, 2) + "\n", encoding: "utf-8", label: "Guardando" }], "Configurar Spotify");
+    SP.cid = cid; ls.set("anahi-sp-cid", cid); renderToday(); renderSpotify();
+    m.className = "msg ok"; m.textContent = "Listo. En un par de minutos Anahí verá el botón de Spotify en sus canciones.";
+  } catch (err) { m.className = "msg err"; m.textContent = ghError(err); }
+});
 
 /* ---------- Navegación ---------- */
 function applyMode(){ $("#tabDedicar").hidden = !isAdmin(); }
@@ -1057,12 +1272,13 @@ function route(){
   const views = ["hoy","dedicatorias","dedicar","ajustes"];
   if (!views.includes(v)) v = "hoy";
   for (const n of views) $("#v-" + n).hidden = n !== v;
-  if (v === "ajustes") fillCfg();
+  if (v === "ajustes") { fillCfg(); $("#spUri").textContent = spRedirect(); $("#spCid").value = SP.cid || ""; }
   document.querySelectorAll(".tabs a").forEach(a => a.dataset.v === v ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current"));
   window.scrollTo(0, 0);
 }
 addEventListener("hashchange", route);
-applyMode(); resetEditor(); route(); setOnline(); refresh();
+applyMode(); resetEditor(); route(); setOnline();
+loadConfig().then(() => { refresh(); spHandleRedirect(); });
 
 // Cambia sola a medianoche y busca dedicatorias nuevas al volver a abrir la app.
 let lastDay = today();

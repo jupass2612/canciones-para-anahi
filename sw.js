@@ -1,7 +1,7 @@
 // Guarda la app para que abra rápido y funcione sin internet.
 // Las canciones descargadas se guardan aparte (IndexedDB) y se reproducen desde ahí.
 const PREFIX = "anahi-";
-const CACHE = PREFIX + "v4";
+const CACHE = PREFIX + "v5";
 const FONTS = PREFIX + "fonts";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "songs/songs.json", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
@@ -43,6 +43,7 @@ self.addEventListener("fetch", e => {
   if (url.origin !== location.origin) return; // GitHub, letras y traductor van directo
 
   // Lista de canciones y la página: primero internet (para ver lo nuevo); sin internet, la copia guardada.
+  if (url.pathname.endsWith("/config.json")) { e.respondWith(networkFirst(req, new URL("config.json", self.registration.scope).href)); return; }
   if (url.pathname.endsWith("/songs/songs.json")) { e.respondWith(networkFirst(req, new URL("songs/songs.json", self.registration.scope).href)); return; }
   if (req.mode === "navigate") { e.respondWith(networkFirst(req, new URL("index.html", self.registration.scope).href)); return; }
   if (/\.(mp3|m4a|aac|wav|ogg)$/i.test(url.pathname)) return; // los audios no se duplican aquí
