@@ -141,7 +141,7 @@ ol.steps b{color:var(--ink)}
 /* Reproductor */
 .player{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;height:100lvh;z-index:10;display:grid;grid-template-rows:auto minmax(0,1fr) auto;color:#fff;overflow:hidden;
   background:linear-gradient(170deg, color-mix(in oklab,var(--song) 80%, #000) 0%, color-mix(in oklab,var(--song) 35%, #0b0308) 75%);
-  padding:calc(12px + env(safe-area-inset-top,0px)) 0 calc(14px + env(safe-area-inset-bottom,0px))}
+  padding:max(calc(env(safe-area-inset-top,0px) + 30px), 56px) 0 calc(14px + env(safe-area-inset-bottom,0px))}
 .ptop{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;padding-inline:14px}
 .pright .spbtn,.pright .trbtn{width:38px;min-width:38px;height:38px;padding:0}
 .pright .trbtn{font-size:.72rem}
