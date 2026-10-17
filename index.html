@@ -142,11 +142,13 @@ ol.steps b{color:var(--ink)}
 .player{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;height:100lvh;z-index:10;display:grid;grid-template-rows:auto minmax(0,1fr) auto;color:#fff;overflow:hidden;
   background:linear-gradient(170deg, color-mix(in oklab,var(--song) 80%, #000) 0%, color-mix(in oklab,var(--song) 35%, #0b0308) 75%);
   padding:calc(12px + env(safe-area-inset-top,0px)) 0 calc(14px + env(safe-area-inset-bottom,0px))}
-.ptop{display:grid;grid-template-columns:96px minmax(0,1fr) 96px;gap:8px;align-items:center;padding-inline:14px}
+.ptop{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;padding-inline:14px}
+.pright .spbtn,.pright .trbtn{width:38px;min-width:38px;height:38px;padding:0}
+.pright .trbtn{font-size:.72rem}
 .pright{display:flex;gap:6px;justify-content:flex-end}
 .ptop .ttl{min-width:0;text-align:center}
 .ptop .ttl b{display:block;font:italic 400 1.25rem/1.15 var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ptop .ttl span{font-size:.8rem;opacity:.75}
+.ptop .ttl span{display:block;font-size:.8rem;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ibtn{border:0;background:rgba(255,255,255,.12);color:#fff;width:42px;height:42px;border-radius:50%;display:grid;place-items:center}
 .ibtn svg{width:20px;height:20px}
 .lyrics{min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:22vh 26px 30vh;mask-image:linear-gradient(transparent 0,#000 18%,#000 78%,transparent 100%);-webkit-mask-image:linear-gradient(transparent 0,#000 18%,#000 78%,transparent 100%)}
@@ -154,7 +156,7 @@ ol.steps b{color:var(--ink)}
 .ln{display:block;width:100%;text-align:left;border:0;background:none;color:inherit;padding:8px 0;
   font:400 1.45rem/1.25 var(--f-display);opacity:.38;transition:opacity .35s, transform .35s;transform-origin:left center}
 .ln.past{opacity:.55}
-.ln.on{opacity:1;font-style:italic;transform:scale(1.12)}
+.ln.on{opacity:1;font-style:italic;transform:scale(1.1);width:calc(100% / 1.1)}
 .static .ln{opacity:.9}
 .ln .tr{display:block;font:400 1rem/1.3 var(--f-body);opacity:.8;margin-top:3px;font-style:normal}
 .notr .ln .tr{display:none}
@@ -1217,6 +1219,8 @@ const pAudio = new Audio(); pAudio.preload = "auto";
 const preAudio = new Audio(); preAudio.preload = "auto"; preAudio.muted = true;
 let repeatMode = ls.get("anahi-repeat", "all"), shuffleOn = ls.get("anahi-shuffle", false);
 pAudio.addEventListener("ended", () => onEnded());
+pAudio.addEventListener("timeupdate", () => { if (P.clock && P.clock.kind === "audio") bgTick(); });
+["loadedmetadata", "seeked", "play", "pause"].forEach(ev => pAudio.addEventListener(ev, () => updatePos(true)));
 pAudio.addEventListener("play", () => setPlayIcon(true));
 pAudio.addEventListener("pause", () => { if (!P.fading) setPlayIcon(false); });
 pAudio.addEventListener("error", () => {
@@ -1355,6 +1359,7 @@ async function startSong(s, queue, opt = {}){
   if (opt.start) P.clock.seek(opt.start);
   P.nextPick = pickNext();
   mediaSessionSetup(s); syncModes();
+  try { navigator.mediaSession.playbackState = opt.autoplay === false ? "paused" : "playing"; } catch {}
   if (opt.show) showPlayer(); else renderMini();
   if (opt.autoplay !== false) togglePlay(true); else setPlayIcon(false);
   cancelAnimationFrame(P.raf); P.raf = requestAnimationFrame(tick);
@@ -1368,7 +1373,7 @@ function stopSession(){
 }
 function showPlayer(){
   $("#player").hidden = false; document.body.style.overflow = "hidden"; renderMini();
-  if (P.els[P.idx]) P.els[P.idx].scrollIntoView({ block: "center" });
+  P.idx = -2; // obliga a recolocar la letra en el siguiente cuadro
 }
 function hidePlayer(){ $("#player").hidden = true; document.body.style.overflow = ""; renderMini(); }
 const closePlayer = hidePlayer;
@@ -1380,14 +1385,24 @@ function fadeTo(v, ms, done){
   const f = now => { const k = Math.min(1, (now - t0) / ms); try { a.volume = from + (v - from) * k; } catch {} if (k < 1) requestAnimationFrame(f); else if (done) done(); };
   requestAnimationFrame(f);
 }
+// En iPhone el volumen lo controla el sistema y, con la pantalla bloqueada, las animaciones se detienen:
+// ahí se pausa y reproduce al instante para que los controles de la pantalla bloqueada respondan.
+const canFade = () => !isIOS && !document.hidden;
 function togglePlay(force){
   if (!P.clock) return;
   const want = force ?? !P.playing;
   if (P.clock.kind === "audio") {
-    if (want) { P.fading = false; try { pAudio.volume = 0; } catch {} P.clock.play(); fadeTo(1, 450); }
-    else { P.fading = true; setPlayIcon(false); fadeTo(0, 200, () => { pAudio.pause(); P.fading = false; try { pAudio.volume = 1; } catch {} }); }
+    P.fading = false;
+    if (want) {
+      if (canFade()) { try { pAudio.volume = 0; } catch {} P.clock.play(); fadeTo(1, 450); }
+      else { try { pAudio.volume = 1; } catch {} P.clock.play(); }
+    } else if (canFade()) {
+      P.fading = true; setPlayIcon(false);
+      fadeTo(0, 200, () => { if (P.fading) pAudio.pause(); P.fading = false; try { pAudio.volume = 1; } catch {} });
+      setTimeout(() => { if (P.fading) { pAudio.pause(); P.fading = false; try { pAudio.volume = 1; } catch {} } }, 400);
+    } else pAudio.pause();
   } else want ? P.clock.play() : P.clock.pause();
-  setPlayIcon(want); savePos(true);
+  setPlayIcon(want); savePos(true); updatePos(true);
 }
 function setPlayIcon(on){
   P.playing = on;
@@ -1421,7 +1436,7 @@ function pickNext(){
 }
 function step(d, auto){
   if (!P.song) return;
-  if (d < 0 && P.clock && P.clock.time() > 4) { P.clock.seek(0); updatePos(true); return; }
+  if (d < 0 && P.clock && P.clock.time() > 4) { P.clock.seek(0); updatePos(true); P.idx = -2; return; }
   const q = P.queue, i = q.findIndex(x => x.id === P.song.id);
   let j;
   if (d > 0) j = P.nextPick;
@@ -1463,6 +1478,16 @@ $("#miniPlay").onclick = () => togglePlay();
 $("#miniNext").onclick = () => step(1);
 $("#miniClose").onclick = () => endSession();
 
+function bgTick(){
+  const c = P.clock; if (!c || !P.playing) return;
+  const t = c.time(), d = c.duration();
+  savePos(); updatePos();
+  if (!P.counted && t >= Math.min(30, (d || 60) * 0.5)) countPlay();
+  if (!P.preloaded && d && t > d * 0.6 && P.nextPick >= 0) {
+    const n = P.queue[P.nextPick]; P.preloaded = n ? n.id : "x";
+    if (n && n.audio && !isDown(n) && navigator.onLine) { preAudio.src = n.audio; preAudio.load(); }
+  }
+}
 function activeIndex(t){ const L = P.song.lines; let idx = -1;
   for (let i = 0; i < L.length; i++) { if (L[i].t <= t + 0.08) idx = i; else break; } return idx; }
 function tick(){
@@ -1474,20 +1499,14 @@ function tick(){
   }
   $("#miniProg").style.width = d ? `${Math.min(100, t / d * 100)}%` : "0";
   if (c.kind === "virtual" && d && t >= d && P.playing) onEnded();
-  if (P.playing) {
-    savePos(); updatePos();
-    if (!P.counted && t >= Math.min(30, (d || 60) * 0.5)) countPlay();
-    if (!P.preloaded && d && t > d * 0.6 && P.nextPick >= 0) {
-      const n = P.queue[P.nextPick]; P.preloaded = n ? n.id : "x";
-      if (n && n.audio && !isDown(n) && navigator.onLine) { preAudio.src = n.audio; preAudio.load(); }
-    }
-  }
+  if (c.kind === "virtual") bgTick();
   if (open && isSynced(P.song.lines)) {
     const idx = activeIndex(t);
     if (idx !== P.idx) {
       P.idx = idx;
       P.els.forEach((el, i) => { el.classList.toggle("on", i === idx); el.classList.toggle("past", i < idx); });
       if (P.els[idx]) P.els[idx].scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
+      else $("#pLyrics").scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
     }
   }
   P.raf = requestAnimationFrame(tick);
