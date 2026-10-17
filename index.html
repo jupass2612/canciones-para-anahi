@@ -244,6 +244,15 @@ body.has-mini .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .metabox div{display:grid;min-width:0}
 .metabox b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .metabox span{font-size:.82rem;color:var(--muted)}
+.albrow{display:flex;gap:8px;align-items:center}
+.albrow input{flex:1;min-width:0}
+.albopts{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;-webkit-overflow-scrolling:touch}
+.albopt{flex:none;display:flex;gap:8px;align-items:center;max-width:240px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:6px 10px 6px 6px;text-align:left}
+.albopt img{width:40px;height:40px;border-radius:8px;object-fit:cover;flex:none}
+.albopt div{display:grid;min-width:0}
+.albopt b{font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.albopt span{font-size:.74rem;color:var(--muted);white-space:nowrap}
+.albopt.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
 .calcard{margin:0 0 16px;gap:10px}
 .calrow{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:6px 0}
 .calrow div{display:grid;min-width:0}
@@ -400,6 +409,11 @@ code.url{display:block;padding:10px 12px;border-radius:10px;background:var(--bg)
         <label>Artista
           <input type="text" id="fArtist" autocomplete="off" placeholder="Quién la canta">
         </label>
+      </div>
+      <div style="display:grid;gap:6px">
+        <label for="fAlbum" style="font-weight:600;font-size:.88rem">Álbum <small>Se llena solo. Si no es el correcto, escríbelo o elige otro de abajo.</small></label>
+        <div class="albrow"><input type="text" id="fAlbum" autocomplete="off" placeholder="Nombre del álbum"><button type="button" class="btn" id="bAlbFind">Buscar</button></div>
+        <div class="albopts" id="albOpts" hidden></div>
       </div>
       <label>Tu mensaje para ella <small>Se ve con letra a mano en la tarjeta y arriba de la letra.</small>
         <textarea id="fDed" class="note" placeholder="Esta me recuerda a la noche que…"></textarea>
@@ -1301,16 +1315,47 @@ function jsonp(url){ return new Promise(res => {
   let t; const done = v => { clearTimeout(t); delete window[cb]; sc.remove(); res(v); };
   window[cb] = done; sc.onerror = () => done(null); t = setTimeout(() => done(null), 8000);
   sc.src = url + "&callback=" + cb; document.head.appendChild(sc); }); }
-async function findCover(title, artist){
-  const url = `https://itunes.apple.com/search?${new URLSearchParams({ term: `${title} ${mainArtist(artist)}`.trim(), entity: "song", limit: "1", country: "mx" })}`;
+const normTxt = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\(.*?\)|\[.*?\]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+const VERSION_RX = /\b(remix|live|en vivo|acustic[oa]?|acoustic|sped up|slowed|instrumental|karaoke|version)\b/i;
+function itMeta(r){
+  const rc = r.collectionName || "";
+  return { cover: r.artworkUrl100 ? r.artworkUrl100.replace(/\/\d+x\d+bb\./, "/600x600bb.") : null,
+           album: rc.replace(/ - (Single|EP)$/i, "").trim() || null,
+           kind: / - Single$/i.test(rc) ? "Sencillo" : / - EP$/i.test(rc) ? "EP" : "Álbum",
+           year: (r.releaseDate || "").slice(0, 4) || "",
+           track: r.trackNumber || null, artist: r.artistName || null,
+           duration: r.trackTimeMillis ? r.trackTimeMillis / 1000 : null };
+}
+/* Busca en Apple Music y elige la versión que más se parece: mismo título, mismo artista,
+   misma duración que tu audio; evita recopilatorios, remixes y en vivo si no los pediste. */
+async function findCover(title, artist, dur){
+  const url = `https://itunes.apple.com/search?${new URLSearchParams({ term: `${title} ${mainArtist(artist)}`.trim(), entity: "song", limit: "25", country: "mx" })}`;
   let j = null;
   try { const r = await fetch(url); j = await r.json(); } catch { j = await jsonp(url); }
-  const r0 = j && j.results && j.results[0];
-  if (!r0) return null;
-  return { cover: r0.artworkUrl100 ? r0.artworkUrl100.replace(/\/\d+x\d+bb\./, "/600x600bb.") : null,
-           album: (r0.collectionName || "").replace(/ - (Single|EP)$/i, "").trim() || null,
-           track: r0.trackNumber || null, artist: r0.artistName || null,
-           duration: r0.trackTimeMillis ? r0.trackTimeMillis / 1000 : null };
+  const rs = ((j && j.results) || []).filter(r => r.trackName);
+  if (!rs.length) return null;
+  const nt = normTxt(title), na = normTxt(mainArtist(artist)), wantsVersion = VERSION_RX.test(title || "");
+  const score = (r, i) => {
+    let s = -i * 0.5;
+    const rt = normTxt(r.trackName), ra = normTxt(r.artistName), rc = r.collectionName || "";
+    if (rt === nt) s += 30; else if (nt && (rt.startsWith(nt) || nt.startsWith(rt))) s += 14; else s -= 10;
+    if (na) s += (ra.includes(na) || na.includes(ra)) ? 20 : -15;
+    if (dur && r.trackTimeMillis) { const d = Math.abs(r.trackTimeMillis / 1000 - dur); s += d <= 2 ? 25 : d <= 5 ? 12 : d > 20 ? -15 : 0; }
+    if (/various|varios/i.test(r.collectionArtistName || "")) s -= 25;
+    if (/\b(hits|exitos|éxitos|now|karaoke|tributo|tribute|lo mejor|best of|grandes|mix|playlist|verano|fiesta)\b/i.test(rc)) s -= 15;
+    if (!wantsVersion && (VERSION_RX.test(r.trackName) || VERSION_RX.test(rc))) s -= 20;
+    if (!/ - (Single|EP)$/i.test(rc)) s += 2; /* si está en sencillo y en álbum, prefiere el álbum */
+    return s;
+  };
+  const ranked = rs.map((r, i) => ({ r, s: score(r, i) })).sort((a, b) => b.s - a.s);
+  const best = itMeta(ranked[0].r), seen = new Set(), alts = [];
+  for (const { r, s } of ranked) {
+    if (s < 10) continue;
+    const m = itMeta(r), k = normTxt(m.album) + "|" + m.kind;
+    if (!m.album || seen.has(k)) continue;
+    seen.add(k); alts.push(m); if (alts.length >= 6) break;
+  }
+  return { ...best, alts };
 }
 const coverPending = new Set();
 async function ensureCover(s){
@@ -1603,8 +1648,8 @@ function setAudioLabel(){
 }
 function resetEditor(){
   if (E.meta && E.meta.picURL) URL.revokeObjectURL(E.meta.picURL);
-  Object.assign(E, { draftId:null, publishedId:null, audioBlob:null, audioName:null, keptAudio:null, meta:{}, audioDur:null, autoTitle:false, lyricsAuto:false });
-  clearTimeout(asT); $("#autoSaved").textContent = ""; $("#metaBox").hidden = true; lastSp = "";
+  Object.assign(E, { draftId:null, publishedId:null, audioBlob:null, audioName:null, keptAudio:null, meta:{}, audioDur:null, autoTitle:false, lyricsAuto:false, albumManual:false, albumAlts:[] });
+  clearTimeout(asT); $("#autoSaved").textContent = ""; $("#metaBox").hidden = true; lastSp = ""; $("#albOpts").hidden = true;
   $("#editor").reset(); $("#c0").checked = true; $("#fDate").value = today();
   $("#edEyebrow").textContent = "Nueva dedicatoria"; $("#edTitle").textContent = "Dedicarle una canción";
   $("#bCancelEdit").hidden = true; setAudioLabel();
@@ -1619,6 +1664,7 @@ function startEdit(s, isDraft){
   E.meta = { ...(s.meta || { cover: s.cover, album: s.album, track: s.track }) };
   if (isDraft && s.target !== undefined) { E.target = s.target || null; E.targetLabel = s.targetLabel || null; renderTargets(); }
   $("#fTitle").value = s.title || ""; $("#fArtist").value = s.artist || ""; $("#fDed").value = s.dedication || "";
+  $("#fAlbum").value = E.meta.album || albumOf(s) || ""; if (!E.meta.album && $("#fAlbum").value) E.meta.album = $("#fAlbum").value;
   $("#fDate").value = s.date || today(); $("#fLyrics").value = toLRC(s.lines); $("#fTrans").value = s.translation || ""; $("#fSpotify").value = s.spotify ? `https://open.spotify.com/track/${s.spotify.split(":").pop()}` : "";
   const r = [...sw.querySelectorAll("input")].find(i => i.value === s.color); if (r) r.checked = true;
   $("#edEyebrow").textContent = E.publishedId ? "Editando dedicatoria" : "Borrador";
@@ -1641,7 +1687,7 @@ $("#fAudio").addEventListener("change", async e => {
   if (tags.title && (!$("#fTitle").value.trim() || E.autoTitle)) { $("#fTitle").value = tags.title; E.autoTitle = false; }
   else if (!$("#fTitle").value.trim()) { $("#fTitle").value = f.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " "); E.autoTitle = true; }
   if (tags.artist && !$("#fArtist").value.trim()) $("#fArtist").value = tags.artist;
-  if (tags.album && !E.meta.album) E.meta.album = tags.album;
+  if (tags.album && !E.meta.album) setAlbum(tags.album);
   if (tags.pic) { if (E.meta.picURL) URL.revokeObjectURL(E.meta.picURL); E.meta.picURL = null; E.meta.picBlob = new Blob([tags.pic.data], { type: tags.pic.mime }); }
   setAudioLabel(); renderMetaPreview();
   msg(tags.title ? "Tomé el título y el artista del archivo. Buscando portada y letra…" : "Buscando portada y letra…");
@@ -1656,7 +1702,9 @@ $("#bDraft").onclick = async () => {
   const f = formSong();
   if (!f.title && !f.lyrics) return msg("Escribe al menos el título o la letra para guardar el borrador.", "err");
   const id = E.draftId || `d-${Date.now().toString(36)}`;
-  try { await draftPut({ id, ...f, audioBlob: E.audioBlob, audioName: E.audioName, keptAudio: E.keptAudio, publishedId: E.publishedId, updated: Date.now() }); }
+  try { await draftPut({ id, ...f, audioBlob: E.audioBlob, audioName: E.audioName, keptAudio: E.keptAudio, publishedId: E.publishedId,
+    meta: { cover: E.meta.cover || null, album: E.meta.album || null, track: E.meta.track || null, picBlob: E.meta.picBlob || null },
+    target: E.target, targetLabel: E.targetLabel, updated: Date.now() }); }
   catch { return msg("No se pudo guardar el borrador en este navegador.", "err"); }
   E.draftId = id; await refresh(false); msg("Borrador guardado en este iPhone. Anahí todavía no lo ve.", "ok");
 };
@@ -1686,8 +1734,9 @@ $("#editor").addEventListener("submit", async e => {
       audio = newPath;
     }
     const same = prev && prev.title === f.title && prev.artist === f.artist;
-    let cover = E.meta.cover || (same && prev.cover) || null, album = E.meta.album || (same && prev.album) || null, track = E.meta.track || (same && prev.track) || null;
-    if (!cover || !album) { msg("Buscando portada y álbum…"); try { const m = await findCover(f.title, f.artist); if (m) { cover = cover || m.cover; album = album || m.album; track = track || m.track; } } catch {} }
+    const typedAlbum = $("#fAlbum").value.trim();
+    let cover = E.meta.cover || (same && prev.cover) || null, album = typedAlbum || E.meta.album || (same && prev.album) || null, track = E.meta.track || (same && prev.track) || null;
+    if (!cover || !album) { msg("Buscando portada y álbum…"); try { const m = await findCover(f.title, f.artist, E.audioDur); if (m) { cover = cover || m.cover; album = album || m.album; track = track || m.track; } } catch {} }
     if (!cover && E.meta.picBlob) { const pb = E.meta.picBlob; cover = `songs/${id}-cover.jpg`; files.push({ path: cover, content: () => blobToB64(pb), encoding: "base64", label: "Subiendo la portada" }); }
     const entry = { id, title: f.title, artist: f.artist, dedication: f.dedication, color: f.color, date: f.date, audio, lyrics: f.lyrics, ...(f.translation ? { translation: f.translation } : {}), ...(f.spotify ? { spotify: f.spotify } : {}), ...(cover ? { cover } : {}), ...(album ? { album } : {}), ...(track ? { track } : {}) };
     const next = prev ? remote.map(x => x.id === id ? entry : x) : [...remote, entry];
@@ -1815,15 +1864,48 @@ function readMP4(b){
   try { walk(0, b.length); } catch {}
   return out;
 }
+/* Álbum: lo llena el mp3, Spotify o Apple Music; si tú lo escribes o eliges, ya no se cambia solo */
+function setAlbum(v, force){
+  if (E.albumManual && !force) return;
+  E.meta.album = v || null; $("#fAlbum").value = v || "";
+}
+function renderAlbumOpts(){
+  const box = $("#albOpts"), alts = E.albumAlts || [];
+  box.hidden = alts.length < 2 && !(alts.length === 1 && normTxt(alts[0].album) !== normTxt(E.meta.album));
+  const cur = normTxt(E.meta.album);
+  box.innerHTML = alts.map((m, i) => `<button type="button" class="albopt${normTxt(m.album) === cur ? " on" : ""}" data-alb="${i}">${m.cover ? `<img src="${esc(m.cover)}" alt="">` : ""}<div><b>${esc(m.album)}</b><span>${esc([m.kind, m.year].filter(Boolean).join(" · "))}${m.duration ? " · " + fmt(m.duration) : ""}</span></div></button>`).join("");
+}
+$("#albOpts").addEventListener("click", e => {
+  const b = e.target.closest("[data-alb]"); if (!b) return;
+  const m = E.albumAlts[+b.dataset.alb]; if (!m) return;
+  E.albumManual = true; setAlbum(m.album, true);
+  if (m.cover) { E.meta.cover = m.cover; E.meta.coverFromSp = false; }
+  E.meta.track = m.track || null;
+  renderAlbumOpts(); renderMetaPreview(); queueAutosave();
+});
+$("#fAlbum").addEventListener("input", () => {
+  const v = $("#fAlbum").value.trim();
+  E.albumManual = !!v; E.meta.album = v || null; renderAlbumOpts(); renderMetaPreview();
+});
+$("#bAlbFind").onclick = async () => {
+  if (!$("#fTitle").value.trim()) { $("#fTitle").focus(); return msg("Escribe primero el título y el artista.", "err"); }
+  msg("Buscando álbumes…"); await autoMeta();
+  msg(E.albumAlts.length ? (E.albumAlts.length > 1 ? "Elige el álbum correcto de la lista." : "Solo encontré ese álbum. Si no es, escríbelo tú.") : "No encontré álbumes. Escríbelo tú.", E.albumAlts.length ? "" : "err");
+};
 async function autoMeta(){
   const t = $("#fTitle").value.trim(), a = $("#fArtist").value.trim(); if (!t || !navigator.onLine) return;
   try {
-    const m = await findCover(t, a);
+    const m = await findCover(t, a, E.meta.spDur || E.audioDur);
     if (m) {
       if (!E.meta.cover && m.cover) E.meta.cover = m.cover;
-      if (!E.meta.album && m.album) E.meta.album = m.album;
-      if (!E.meta.track && m.track) E.meta.track = m.track;
+      if (!E.meta.album && m.album) setAlbum(m.album);
+      if (!E.meta.track && m.track && normTxt(m.album) === normTxt(E.meta.album)) E.meta.track = m.track;
       if (!a && m.artist) $("#fArtist").value = m.artist;
+      E.albumAlts = m.alts || [];
+      /* si Spotify dio el álbum, ponlo primero en la lista */
+      if (E.meta.album && !E.albumAlts.some(x => normTxt(x.album) === normTxt(E.meta.album)))
+        E.albumAlts.unshift({ album: E.meta.album, cover: E.meta.cover || null, kind: E.meta.spAlbum ? "Spotify" : "Actual", year: "", track: E.meta.track || null });
+      renderAlbumOpts();
     }
   } catch {}
   renderMetaPreview();
@@ -1839,17 +1921,22 @@ let lastSp = "";
 $("#fSpotify").addEventListener("input", async () => {
   const uri = spParse($("#fSpotify").value); if (!uri || uri === lastSp) return; lastSp = uri;
   const id = uri.split(":").pop(); msg("Leyendo el enlace de Spotify…");
-  let title = "", artist = "", album = "", cover = "";
-  try { if (spTok()) { const t = await spApi(`/tracks/${id}`); title = t.name || ""; artist = (t.artists || []).map(a => a.name).join(" & "); album = (t.album && t.album.name) || ""; cover = (t.album && t.album.images && t.album.images[0] && t.album.images[0].url) || ""; } } catch {}
+  let title = "", artist = "", album = "", cover = "", track = null, dur = null;
+  try { if (spTok()) { const t = await spApi(`/tracks/${id}`); title = t.name || ""; artist = (t.artists || []).map(a => a.name).join(" & "); album = (t.album && t.album.name) || ""; cover = (t.album && t.album.images && t.album.images[0] && t.album.images[0].url) || ""; track = t.track_number || null; dur = t.duration_ms ? t.duration_ms / 1000 : null; } } catch {}
   if (!title) { try { const r = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent("https://open.spotify.com/track/" + id)}`); if (r.ok) { const j = await r.json(); title = j.title || ""; cover = cover || j.thumbnail_url || ""; } } catch {} }
   if (!title) return msg("No pude leer ese enlace. Escribe el título y el artista.", "err");
   if (!$("#fTitle").value.trim() || E.autoTitle) { $("#fTitle").value = title; E.autoTitle = false; }
+  const hadArtist = !!$("#fArtist").value.trim();
   if (artist && !$("#fArtist").value.trim()) $("#fArtist").value = artist;
-  if (album) E.meta.album = album; if (cover) E.meta.cover = cover;
+  /* El enlace manda: reemplaza el álbum que venía del mp3 o de la búsqueda (salvo que tú lo hayas escrito) */
+  E.meta.spAlbum = !!album; E.meta.spDur = dur;
+  setAlbum(album || null); if (!E.albumManual) E.meta.track = track;
+  if (cover) E.meta.cover = cover;
   msg(artist ? "Tomé los datos de Spotify. Buscando la letra…" : "Tomé el título de Spotify. Revisa el artista; buscando portada y letra…");
   await autoMeta();
   if (!$("#fLyrics").value.trim() || E.lyricsAuto) await runFind(true);
-  msg(artist ? "" : "Revisa que el artista sea el correcto."); queueAutosave();
+  const albNote = !E.meta.spAlbum && !E.albumManual && (E.albumAlts || []).length > 1 ? " Revisa el álbum: si no es, elige otro de la lista o escríbelo." : "";
+  msg(((artist || hadArtist ? "" : "Revisa que el artista sea el correcto.") + albNote).trim()); queueAutosave();
 });
 
 /* ---------- Vista previa: así la verá ella ---------- */
