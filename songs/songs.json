@@ -175,6 +175,140 @@
       "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/06/4d/69/064d69c6-4080-db0f-89b4-b3505a91b23d/19UM1IM14279.rgb.jpg/600x600bb.jpg",
       "album": "Diaz Antes: La Ciudad de los Niños Tristes",
       "track": 4
+    },
+    {
+      "id": "20261019-aap10-quien-te-quiere-como-el-nene",
+      "title": "QUIÉN TE QUIERE COMO EL NENE",
+      "artist": "Álvaro Díaz",
+      "dedication": "",
+      "color": "#d6336c",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap10-quien-te-quiere-como-el-nene.mp3",
+      "lyrics": "",
+      "cover": "songs/20261019-aap10-quien-te-quiere-como-el-nene-cover.jpg"
+    },
+    {
+      "id": "20261019-aap11-a-mi-nombre",
+      "title": "A Mi Nombre",
+      "artist": "Álvaro Díaz",
+      "dedication": "",
+      "color": "#8e2453",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap11-a-mi-nombre.mp3",
+      "lyrics": "",
+      "cover": "songs/20261019-aap11-a-mi-nombre-cover.jpg"
+    },
+    {
+      "id": "20261019-aap12-en-pr-no-hace-frio",
+      "title": "En Pr No Hace Frío",
+      "artist": "Álvaro Díaz",
+      "dedication": "",
+      "color": "#e0603f",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap12-en-pr-no-hace-frio.mp3",
+      "lyrics": "",
+      "cover": "songs/20261019-aap12-en-pr-no-hace-frio-cover.jpg"
+    },
+    {
+      "id": "20261019-aap13-mami-100pre-sabe",
+      "title": "MAMI 100PRE SABE",
+      "artist": "Álvaro Díaz, NSQK",
+      "dedication": "",
+      "color": "#7d64c9",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap13-mami-100pre-sabe.mp3",
+      "lyrics": "",
+      "cover": "songs/20261019-aap13-mami-100pre-sabe-cover.jpg"
+    },
+    {
+      "id": "20261019-aap14-sin-poderes",
+      "title": "SIN PODERES",
+      "artist": "Álvaro Díaz",
+      "dedication": "",
+      "color": "#2f78ad",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap14-sin-poderes.mp3",
+      "lyrics": "",
+      "cover": "songs/20261019-aap14-sin-poderes-cover.jpg"
+    },
+    {
+      "id": "20261019-aap15-byak",
+      "title": "BYAK",
+      "artist": "Álvaro Díaz",
+      "dedication": "",
+      "color": "#b98a1e",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap15-byak.mp3",
+      "lyrics": "",
+      "cover": "songs/20261019-aap15-byak-cover.jpg"
+    },
+    {
+      "id": "20261019-aap16-1000-canciones",
+      "title": "1000 Canciones",
+      "artist": "Álvaro Díaz",
+      "dedication": "",
+      "color": "#d6336c",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap16-1000-canciones.mp3",
+      "lyrics": "",
+      "cover": "songs/20261019-aap16-1000-canciones-cover.jpg"
+    },
+    {
+      "id": "20261019-aap17-fatal-fantassy",
+      "title": "FATAL FANTASSY",
+      "artist": "Álvaro Díaz",
+      "dedication": "",
+      "color": "#8e2453",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap17-fatal-fantassy.mp3",
+      "lyrics": "",
+      "cover": "songs/20261019-aap17-fatal-fantassy-cover.jpg"
+    },
+    {
+      "id": "20261019-aap18-pln",
+      "title": "PLN",
+      "artist": "Álvaro Díaz",
+      "dedication": "",
+      "color": "#e0603f",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap18-pln.mp3",
+      "lyrics": "",
+      "cover": "songs/20261019-aap18-pln-cover.jpg"
+    },
+    {
+      "id": "20261019-aap19-gatitas-sandungueras-vol-1",
+      "title": "GATITAS SANDUNGUERAS VOL.1",
+      "artist": "Álvaro Díaz",
+      "dedication": "",
+      "color": "#7d64c9",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap19-gatitas-sandungueras-vol-1.mp3",
+      "lyrics": "",
+      "cover": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/fe/18/cf/fe18cfa8-45ce-bbc1-3e0e-b3f467473ce3/24UMGIM46494.rgb.jpg/600x600bb.jpg",
+      "album": "SAYONARA",
+      "track": 3
+    },
+    {
+      "id": "20261019-aap110-kawa",
+      "title": "KAWA",
+      "artist": "Álvaro Díaz",
+      "dedication": "",
+      "color": "#2f78ad",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap110-kawa.mp3",
+      "lyrics": "",
+      "cover": "songs/20261019-aap110-kawa-cover.jpg"
+    },
+    {
+      "id": "20261019-aap111-te-vi-en-mis-pesadillas",
+      "title": "Te Vi En Mis Pesadillas",
+      "artist": "Álvaro Díaz",
+      "dedication": "",
+      "color": "#b98a1e",
+      "date": "2026-10-19",
+      "audio": "songs/20261019-aap111-te-vi-en-mis-pesadillas.mp3",
+      "lyrics": "[00:03.52]Se acabó\n[00:05.71]♪\n[00:15.61]Te extraño, pero me hago el loco\n[00:18.02]Picheo 'e borrar la foto\n[00:20.20]Le he dao la vuelta al mundo\n[00:21.87]Con este corazón roto\n[00:24.05]Salí de pobre cantando canciones de nosotros\n[00:28.14]Se apaga y prendo otro (otro, otro, otro)\n[00:30.91]No estaba ready\n[00:33.35]Ahora te veo en mis pesadilla', flow Freddy\n[00:37.10]Tu recuerdo me persigue, ya sal de mí (mí, mí, mí)\n[00:41.28]Mente, hazme el favor\n[00:45.16]Que yo tampoco quería decir adiós\n[00:49.48]Pero lamentablemente tocó\n[00:53.04]Ya ni me importa quién tenía la razón\n[00:56.98]Tengo que decirle sayonara a tu amor\n[01:00.42]Sayonara a tu amor\n[01:02.35]Sayonara\n[01:03.16]Yo que tengo en DM lleno de baddies\n[01:05.31]Flow Euphoria, flow Maddy\n[01:07.55]Me la paso to el día en tu IG\n[01:09.45]Pa ver si los caption son pa mí\n[01:11.33]Fumando mari de Cali\n[01:13.28]Pa hacer telepatía, flow Kali\n[01:15.34]Con los ojos rojos Ferrari\n[01:17.29]Gafas oscuras en el party\n[01:19.32]Porque te fuiste de aquí\n[01:21.44]Y me subía' el ki\n[01:23.38]Haciendo canciones pa ti\n[01:25.45]Yo era to un real G\n[01:27.13]Y mis ojos no mienten, flow Manny\n[01:29.03]No me quieres más, pues ta to clari\n[01:31.28]Pa la calle, Versace Gianni\n[01:33.45]Buscando amor-mor\n[01:34.85]No estaba ready\n[01:37.37]Ahora te veo en mis pesadilla', flow Freddy\n[01:41.02]Tu recuerdo me persigue, ya sal de mí (mí, mí, mí)\n[01:45.41]Mente, hazme el favor\n[01:49.21]Que yo tampoco quería decir adiós\n[01:53.24]Pero lamentablemente tocó\n[01:57.16]Ya ni me importa quién tenía la razón\n[02:00.92]Tengo que decirle sayonara a tu amor\n[02:04.22]Sayonara a tu amor\n[02:06.43]Sayonara\n[02:09.22]♪\n[02:32.31]Álvaro, no me jodas, ¿eh?\n[02:33.97]Levántate de ahí ahora mismo y vamos pa la calle\n[02:34.16]♪",
+      "cover": "songs/20261019-aap111-te-vi-en-mis-pesadillas-cover.jpg"
     }
   ]
 }
