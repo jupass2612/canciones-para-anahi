@@ -1,0 +1,439 @@
+{
+ "days": [
+  {
+   "date": "2026-10-06",
+   "title": "Mi persona favorita",
+   "artist": "Alejandro Sanz & Camila Cabello"
+  },
+  {
+   "date": "2026-10-07",
+   "title": "Perfect",
+   "artist": "Ed Sheeran"
+  },
+  {
+   "date": "2026-10-08",
+   "title": "Primera cita",
+   "artist": "Carin León"
+  },
+  {
+   "date": "2026-10-09",
+   "title": "Si antes te hubiera conocido",
+   "artist": "Karol G"
+  },
+  {
+   "date": "2026-10-10",
+   "title": "Eres",
+   "artist": "Café Tacvba"
+  },
+  {
+   "date": "2026-10-11",
+   "title": "Thinking Out Loud",
+   "artist": "Ed Sheeran"
+  },
+  {
+   "date": "2026-10-12",
+   "title": "Bachata rosa",
+   "artist": "Juan Luis Guerra"
+  },
+  {
+   "date": "2026-10-13",
+   "title": "No se va",
+   "artist": "Grupo Frontera"
+  },
+  {
+   "date": "2026-10-14",
+   "title": "All of Me",
+   "artist": "John Legend"
+  },
+  {
+   "date": "2026-10-15",
+   "title": "Close Friends",
+   "artist": "Álvaro Díaz"
+  },
+  {
+   "date": "2026-10-16",
+   "title": "Burbujas de amor",
+   "artist": "Juan Luis Guerra"
+  },
+  {
+   "date": "2026-10-17",
+   "title": "Lover",
+   "artist": "Taylor Swift"
+  },
+  {
+   "date": "2026-10-18",
+   "title": "Problemón",
+   "artist": "Álvaro Díaz & Rauw Alejandro"
+  },
+  {
+   "date": "2026-10-19",
+   "title": "Para tu amor",
+   "artist": "Juanes"
+  },
+  {
+   "date": "2026-10-20",
+   "title": "Love Story",
+   "artist": "Taylor Swift"
+  },
+  {
+   "date": "2026-10-21",
+   "title": "Mi niña bonita",
+   "artist": "Chino & Nacho"
+  },
+  {
+   "date": "2026-10-22",
+   "title": "A Dios le pido",
+   "artist": "Juanes"
+  },
+  {
+   "date": "2026-10-23",
+   "title": "Daylight",
+   "artist": "Taylor Swift"
+  },
+  {
+   "date": "2026-10-24",
+   "title": "1000CANCIONES",
+   "artist": "Álvaro Díaz & Sen Senra"
+  },
+  {
+   "date": "2026-10-25",
+   "title": "Es por ti",
+   "artist": "Juanes"
+  },
+  {
+   "date": "2026-10-26",
+   "title": "Andas en mi cabeza",
+   "artist": "Chino & Nacho & Daddy Yankee"
+  },
+  {
+   "date": "2026-10-27",
+   "title": "Adore You",
+   "artist": "Harry Styles"
+  },
+  {
+   "date": "2026-10-28",
+   "title": "Me enamora",
+   "artist": "Juanes"
+  },
+  {
+   "date": "2026-10-29",
+   "title": "BYAK",
+   "artist": "Álvaro Díaz & Rauw Alejandro"
+  },
+  {
+   "date": "2026-10-30",
+   "title": "Yellow",
+   "artist": "Coldplay"
+  },
+  {
+   "date": "2026-10-31",
+   "title": "Cómo mirarte",
+   "artist": "Sebastián Yatra"
+  },
+  {
+   "date": "2026-11-01",
+   "title": "18+1",
+   "artist": "Álvaro Díaz & Jesse Baez"
+  },
+  {
+   "date": "2026-11-02",
+   "title": "Can't Help Falling in Love",
+   "artist": "Elvis Presley"
+  },
+  {
+   "date": "2026-11-03",
+   "title": "Tacones rojos",
+   "artist": "Sebastián Yatra"
+  },
+  {
+   "date": "2026-11-04",
+   "title": "Lentito",
+   "artist": "Álvaro Díaz"
+  },
+  {
+   "date": "2026-11-05",
+   "title": "Amor del bueno",
+   "artist": "Reyli Barba"
+  },
+  {
+   "date": "2026-11-06",
+   "title": "Just the Way You Are",
+   "artist": "Bruno Mars"
+  },
+  {
+   "date": "2026-11-07",
+   "title": "Darte un beso",
+   "artist": "Prince Royce"
+  },
+  {
+   "date": "2026-11-08",
+   "title": "Sabes",
+   "artist": "Reik"
+  },
+  {
+   "date": "2026-11-09",
+   "title": "Die With A Smile",
+   "artist": "Lady Gaga & Bruno Mars"
+  },
+  {
+   "date": "2026-11-10",
+   "title": "QUIZÁS SI QUIZÁS NO",
+   "artist": "Álvaro Díaz & Quevedo"
+  },
+  {
+   "date": "2026-11-11",
+   "title": "Te amo",
+   "artist": "Franco De Vita"
+  },
+  {
+   "date": "2026-11-12",
+   "title": "Until I Found You",
+   "artist": "Stephen Sanchez"
+  },
+  {
+   "date": "2026-11-13",
+   "title": "Corazón sin cara",
+   "artist": "Prince Royce"
+  },
+  {
+   "date": "2026-11-14",
+   "title": "Eres mi religión",
+   "artist": "Maná"
+  },
+  {
+   "date": "2026-11-15",
+   "title": "Ramona Flowers",
+   "artist": "Álvaro Díaz"
+  },
+  {
+   "date": "2026-11-16",
+   "title": "Golden Hour",
+   "artist": "JVKE"
+  },
+  {
+   "date": "2026-11-17",
+   "title": "Bendita tu luz",
+   "artist": "Maná & Juan Luis Guerra"
+  },
+  {
+   "date": "2026-11-18",
+   "title": "Lucky",
+   "artist": "Jason Mraz & Colbie Caillat"
+  },
+  {
+   "date": "2026-11-19",
+   "title": "Chinita Linda",
+   "artist": "Álvaro Díaz & Rawayana"
+  },
+  {
+   "date": "2026-11-20",
+   "title": "Hasta la raíz",
+   "artist": "Natalia Lafourcade"
+  },
+  {
+   "date": "2026-11-21",
+   "title": "Videos",
+   "artist": "Álvaro Díaz & Rauw Alejandro"
+  },
+  {
+   "date": "2026-11-22",
+   "title": "Make You Feel My Love",
+   "artist": "Adele"
+  },
+  {
+   "date": "2026-11-23",
+   "title": "Tú sí sabes quererme",
+   "artist": "Natalia Lafourcade"
+  },
+  {
+   "date": "2026-11-24",
+   "title": "YOKO",
+   "artist": "Álvaro Díaz"
+  },
+  {
+   "date": "2026-11-25",
+   "title": "A Thousand Years",
+   "artist": "Christina Perri"
+  },
+  {
+   "date": "2026-11-26",
+   "title": "Cuando nadie ve",
+   "artist": "Morat"
+  },
+  {
+   "date": "2026-11-27",
+   "title": "Cuando me enamoro",
+   "artist": "Enrique Iglesias & Juan Luis Guerra"
+  },
+  {
+   "date": "2026-11-28",
+   "title": "Best Part",
+   "artist": "Daniel Caesar & H.E.R."
+  },
+  {
+   "date": "2026-11-29",
+   "title": "Fruta fresca",
+   "artist": "Carlos Vives"
+  },
+  {
+   "date": "2026-11-30",
+   "title": "QUIÉN TE QUIERE COMO EL NENE",
+   "artist": "Álvaro Díaz"
+  },
+  {
+   "date": "2026-12-01",
+   "title": "Bailar contigo",
+   "artist": "Carlos Vives"
+  },
+  {
+   "date": "2026-12-02",
+   "title": "So Easy (To Fall in Love)",
+   "artist": "Olivia Dean"
+  },
+  {
+   "date": "2026-12-03",
+   "title": "Una lady como tú",
+   "artist": "Manuel Turizo"
+  },
+  {
+   "date": "2026-12-04",
+   "title": "Ojos color sol",
+   "artist": "Calle 13 & Silvio Rodríguez"
+  },
+  {
+   "date": "2026-12-05",
+   "title": "Birds of a Feather",
+   "artist": "Billie Eilish"
+  },
+  {
+   "date": "2026-12-06",
+   "title": "FATAL FANTASSY",
+   "artist": "Álvaro Díaz & Tainy"
+  },
+  {
+   "date": "2026-12-07",
+   "title": "Contigo aprendí",
+   "artist": "Armando Manzanero"
+  },
+  {
+   "date": "2026-12-08",
+   "title": "Mera",
+   "artist": "Álvaro Díaz & Tainy"
+  },
+  {
+   "date": "2026-12-09",
+   "title": "I Wanna Be Yours",
+   "artist": "Arctic Monkeys"
+  },
+  {
+   "date": "2026-12-10",
+   "title": "Somos novios",
+   "artist": "Armando Manzanero"
+  },
+  {
+   "date": "2026-12-11",
+   "title": "A MI NOMBRE",
+   "artist": "Álvaro Díaz & Mora"
+  },
+  {
+   "date": "2026-12-12",
+   "title": "Something",
+   "artist": "The Beatles"
+  },
+  {
+   "date": "2026-12-13",
+   "title": "Día de enero",
+   "artist": "Shakira"
+  },
+  {
+   "date": "2026-12-14",
+   "title": "Me enamoré",
+   "artist": "Shakira"
+  },
+  {
+   "date": "2026-12-15",
+   "title": "Fly Me to the Moon",
+   "artist": "Frank Sinatra"
+  },
+  {
+   "date": "2026-12-16",
+   "title": "EN PR NO HACE FRÍO",
+   "artist": "Álvaro Díaz & paopao"
+  },
+  {
+   "date": "2026-12-17",
+   "title": "Por debajo de la mesa",
+   "artist": "Luis Miguel"
+  },
+  {
+   "date": "2026-12-18",
+   "title": "Photograph",
+   "artist": "Ed Sheeran"
+  },
+  {
+   "date": "2026-12-19",
+   "title": "Contigo en la distancia",
+   "artist": "Luis Miguel"
+  },
+  {
+   "date": "2026-12-20",
+   "title": "La bicicleta",
+   "artist": "Carlos Vives & Shakira"
+  },
+  {
+   "date": "2026-12-21",
+   "title": "I'm Yours",
+   "artist": "Jason Mraz"
+  },
+  {
+   "date": "2026-12-22",
+   "title": "PIENSO EN TI",
+   "artist": "Álvaro Díaz"
+  },
+  {
+   "date": "2026-12-23",
+   "title": "Sabor a mí",
+   "artist": "Eydie Gormé & Trío Los Panchos"
+  },
+  {
+   "date": "2026-12-24",
+   "title": "All I Want for Christmas Is You",
+   "artist": "Mariah Carey"
+  },
+  {
+   "date": "2026-12-25",
+   "title": "Paper Rings",
+   "artist": "Taylor Swift"
+  },
+  {
+   "date": "2026-12-26",
+   "title": "Coleccionista de canciones",
+   "artist": "Camila"
+  },
+  {
+   "date": "2026-12-27",
+   "title": "KAWA",
+   "artist": "Álvaro Díaz"
+  },
+  {
+   "date": "2026-12-28",
+   "title": "EN LA MISMA CIUDAD",
+   "artist": "Álvaro Díaz & Jesse Baez"
+  },
+  {
+   "date": "2026-12-29",
+   "title": "Todo cambió",
+   "artist": "Camila"
+  },
+  {
+   "date": "2026-12-30",
+   "title": "Love on Top",
+   "artist": "Beyoncé"
+  },
+  {
+   "date": "2026-12-31",
+   "title": "Lo mejor de mi vida eres tú",
+   "artist": "Ricky Martin & Natalia Jiménez"
+  }
+ ]
+}
