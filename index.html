@@ -221,6 +221,14 @@ body.has-mini .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 14px;font-weight:600;font-size:.84rem}
 .chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
+/* Dedicatorias agrupadas */
+.grp{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin:14px 0 2px;list-style:none}
+.grp:first-child{margin-top:0}
+.grp img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex:none}
+.grp div{display:grid;min-width:0}
+.grp b{font:400 1.45rem/1.15 var(--f-display);overflow-wrap:anywhere}
+.grp span{font-size:.8rem;color:var(--muted)}
+
 /* Avisos */
 .pushcard{margin-top:16px;gap:10px}
 .pushcard b.h{font:400 1.3rem/1.2 var(--f-display)}
@@ -344,6 +352,7 @@ code.url{display:block;padding:10px 12px;border-radius:10px;background:var(--bg)
       <span class="hint">Pasa todas tus canciones a Spotify.</span>
       <button type="button" class="btn" id="spAll">Agregar todas a Spotify</button>
     </div>
+    <div class="chips" id="groupChips" hidden><button type="button" class="chip" data-g="recent">Recientes</button><button type="button" class="chip" data-g="artist">Por artista</button><button type="button" class="chip" data-g="album">Por álbum</button></div>
     <div class="chips" id="favChips" hidden><button type="button" class="chip" data-f="all" aria-pressed="true">Todas</button><button type="button" class="chip" data-f="fav" aria-pressed="false">♥ Favoritas</button></div>
     <ul class="list" id="songList"></ul>
   </section>
@@ -1019,16 +1028,32 @@ function renderList(){
   let list = admin ? [...S.songs].sort((a,b) => (b.date||"").localeCompare(a.date||"") || byId(b,a)) : herOrder();
   $("#favChips").hidden = !favs.size;
   if (S.onlyFav && favs.size) list = list.filter(x => isFav(x.id));
-  if (!list.length) { ul.innerHTML = `<li class="empty"><span class="hand">Muy pronto</span>Aquí se irán guardando todas tus canciones.</li>`; return; }
-  ul.innerHTML = list.map(s => itemHTML(s, admin)).join("");
+  const g = S.group = S.group || ls.get("anahi-group", "recent");
+  $("#groupChips").hidden = list.length < 2;
+  document.querySelectorAll("#groupChips .chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.g === g)));
+  if (!list.length) { S.displayed = []; ul.innerHTML = `<li class="empty"><span class="hand">Muy pronto</span>Aquí se irán guardando todas tus canciones.</li>`; return; }
+  if (g === "recent") { S.displayed = list; ul.innerHTML = list.map(s => itemHTML(s, admin)).join(""); return; }
+  // Agrupar por artista principal o por álbum; dentro de cada grupo, la más reciente primero
+  const keyOf = x => g === "artist" ? (mainArtist(x.artist) || "Sin artista") : (albumOf(x) || "Álbum sin identificar");
+  const groups = new Map();
+  for (const x of list) { const k = keyOf(x); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(x); }
+  const unknown = g === "album" ? "Álbum sin identificar" : "Sin artista";
+  const names = [...groups.keys()].sort((a, b) => (a === unknown) - (b === unknown) || groups.get(b).length - groups.get(a).length || a.localeCompare(b, "es"));
+  S.displayed = names.flatMap(k => groups.get(k));
+  ul.innerHTML = names.map(k => {
+    const items = groups.get(k), cov = coverOf(items.find(coverOf));
+    const sub = g === "album" ? (mainArtist(items[0].artist) || "") : "";
+    return `<li class="grp">${g === "album" && cov ? `<img src="${esc(cov)}" alt="">` : ""}<div><b>${esc(k)}</b><span>${sub ? esc(sub) + " · " : ""}${items.length} ${items.length === 1 ? "canción" : "canciones"}</span></div></li>`
+      + items.map(x => itemHTML(x, admin, g)).join("");
+  }).join("");
 }
 function renderLists(){ renderList(); renderRecent(); }
-function itemHTML(s, admin){
+function itemHTML(s, admin, g){
     const t = today(), scheduled = s.date && s.date > t, open = S.openMenu === s.id;
     const na = !navigator.onLine && s.audio && !isDown(s);
     return `<li class="item ${na ? "na" : ""}" data-id="${esc(s.id)}">
       <button class="dot ${!admin && isNew(s) ? "new" : ""} ${coverOf(s) ? "cov" : ""}" style="--c:${esc(s.color||"#a8204f")}${coverOf(s) ? `;background-image:url('${esc(coverOf(s))}')` : ""}" data-act="play" aria-label="Reproducir ${esc(s.title)}"><svg><use href="#i-play"/></svg></button>
-      <div class="meta"><b>${isFav(s.id) ? `<span class="favtag" aria-label="Favorita">♥</span> ` : ""}${esc(s.title)}</b><span>${esc(s.artist||"")}${plays[s.id] ? ` · ${plays[s.id]} ${plays[s.id] === 1 ? "vez" : "veces"}` : ""}</span>
+      <div class="meta"><b>${isFav(s.id) ? `<span class="favtag" aria-label="Favorita">♥</span> ` : ""}${esc(s.title)}</b><span>${esc(g === "artist" ? (albumOf(s) || s.artist || "") : (s.artist || ""))}${plays[s.id] ? ` · ${plays[s.id]} ${plays[s.id] === 1 ? "vez" : "veces"}` : ""}</span>
         ${s.dedication ? `<div class="hand">${esc(s.dedication)}</div>` : ""}
         <div class="tags">
           ${!admin && isNew(s) ? `<span class="tag new">Nueva</span>` : ""}
@@ -1048,7 +1073,7 @@ function itemHTML(s, admin){
 async function onListClick(e){
   const b = e.target.closest("[data-act]"); if (!b) return;
   const id = b.closest(".item").dataset.id, s = S.songs.find(x => x.id === id), act = b.dataset.act;
-  if (act === "play") return openPlayer(s, isAdmin() ? S.songs : (S.onlyFav && favs.size ? herOrder().filter(x => isFav(x.id)) : herOrder()));
+  if (act === "play") { const inList = b.closest("#songList") && S.displayed && S.displayed.length; return openPlayer(s, inList ? S.displayed : (isAdmin() ? S.songs : herOrder())); }
   if (act === "dl") return downloadSong(s);
   if (act === "undl") { S.confirmUndl = S.confirmUndl === id ? null : id; return renderLists(); }
   if (act === "undlno") { S.confirmUndl = null; return renderLists(); }
@@ -1070,6 +1095,8 @@ async function onListClick(e){
   }
 }
 $("#songList").addEventListener("click", onListClick);
+$("#groupChips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return;
+  S.group = b.dataset.g; ls.set("anahi-group", S.group); renderList(); });
 $("#favChips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; S.onlyFav = b.dataset.f === "fav";
   document.querySelectorAll("#favChips .chip").forEach(c => c.setAttribute("aria-pressed", String(c === b))); renderList(); });
 $("#recentList").addEventListener("click", onListClick);
@@ -1130,6 +1157,8 @@ pAudio.addEventListener("error", () => {
 /* Portadas: se buscan por título y artista en el catálogo de Apple Music y se guardan en el teléfono */
 const coverMap = ls.get("anahi-covers", {});
 const coverOf = s => (s && (s.cover || coverMap[s.id])) || null;
+const albumMap = ls.get("anahi-albums", {});
+const albumOf = s => (s && (s.album || albumMap[s.id])) || null;
 const mainArtist = a => String(a || "").split(/,| ft\.? | feat\.? | & | x | y /i)[0].trim();
 function jsonp(url){ return new Promise(res => {
   const cb = "itcb" + Date.now() + Math.floor(Math.random() * 1e4), sc = document.createElement("script");
@@ -1140,16 +1169,25 @@ async function findCover(title, artist){
   const url = `https://itunes.apple.com/search?${new URLSearchParams({ term: `${title} ${mainArtist(artist)}`, entity: "song", limit: "1", country: "mx" })}`;
   let j = null;
   try { const r = await fetch(url); j = await r.json(); } catch { j = await jsonp(url); }
-  const a = j && j.results && j.results[0] && j.results[0].artworkUrl100;
-  return a ? a.replace(/\/\d+x\d+bb\./, "/600x600bb.") : null;
+  const r0 = j && j.results && j.results[0];
+  if (!r0) return null;
+  return { cover: r0.artworkUrl100 ? r0.artworkUrl100.replace(/\/\d+x\d+bb\./, "/600x600bb.") : null,
+           album: (r0.collectionName || "").replace(/ - (Single|EP)$/i, "").trim() || null };
 }
 const coverPending = new Set();
 async function ensureCover(s){
-  if (!s || s.draft || coverOf(s) || s.id === DEMO.id || coverPending.has(s.id) || !navigator.onLine) return;
+  if (!s || s.draft || (coverOf(s) && albumOf(s)) || s.id === DEMO.id || coverPending.has(s.id) || !navigator.onLine) return;
   coverPending.add(s.id);
-  try { const u = await findCover(s.title, s.artist); if (u) { coverMap[s.id] = u; ls.set("anahi-covers", coverMap); paintCovers(s.id); } } catch {}
+  try {
+    const m = await findCover(s.title, s.artist);
+    if (m) {
+      if (m.cover && !coverOf(s)) { coverMap[s.id] = m.cover; ls.set("anahi-covers", coverMap); }
+      if (m.album && !albumOf(s)) { albumMap[s.id] = m.album; ls.set("anahi-albums", albumMap); }
+      paintCovers(s.id);
+    }
+  } catch {}
 }
-function ensureCovers(list){ list.filter(x => !coverOf(x)).slice(0, 40).forEach((x, i) => setTimeout(() => ensureCover(x), i * 300)); }
+function ensureCovers(list){ list.filter(x => !coverOf(x) || !albumOf(x)).slice(0, 40).forEach((x, i) => setTimeout(() => ensureCover(x), i * 300)); }
 let paintT = 0;
 function paintCovers(id){
   clearTimeout(paintT); paintT = setTimeout(() => { renderToday(); renderList(); }, 150);
@@ -1458,9 +1496,10 @@ $("#editor").addEventListener("submit", async e => {
       if (audio && audio !== newPath) files.push({ path: audio, remove: true });
       audio = newPath;
     }
-    let cover = (prev && prev.title === f.title && prev.cover) || null;
-    if (!cover) { msg("Buscando la portada…"); try { cover = await findCover(f.title, f.artist); } catch {} }
-    const entry = { id, title: f.title, artist: f.artist, dedication: f.dedication, color: f.color, date: f.date, audio, lyrics: f.lyrics, ...(f.translation ? { translation: f.translation } : {}), ...(f.spotify ? { spotify: f.spotify } : {}), ...(cover ? { cover } : {}) };
+    const same = prev && prev.title === f.title && prev.artist === f.artist;
+    let cover = (same && prev.cover) || null, album = (same && prev.album) || null;
+    if (!cover || !album) { msg("Buscando portada y álbum…"); try { const m = await findCover(f.title, f.artist); if (m) { cover = cover || m.cover; album = album || m.album; } } catch {} }
+    const entry = { id, title: f.title, artist: f.artist, dedication: f.dedication, color: f.color, date: f.date, audio, lyrics: f.lyrics, ...(f.translation ? { translation: f.translation } : {}), ...(f.spotify ? { spotify: f.spotify } : {}), ...(cover ? { cover } : {}), ...(album ? { album } : {}) };
     const next = prev ? remote.map(x => x.id === id ? entry : x) : [...remote, entry];
     files.push(songsFile(next));
     await commit(files, `${prev ? "Editar" : "Dedicar"}: ${f.title}`, label => msg(`${label}…`));
