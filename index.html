@@ -229,6 +229,13 @@ body.has-mini .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .grp b{font:400 1.45rem/1.15 var(--f-display);overflow-wrap:anywhere}
 .grp span{font-size:.8rem;color:var(--muted)}
 
+/* Escuchar álbum o artista */
+.grpplay{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:8px 14px;font-weight:700;font-size:.82rem;background:var(--accent);color:var(--accent-ink)}
+.grpplay svg{width:14px;height:14px}
+#albPick{display:grid;gap:6px;max-height:40vh;overflow:auto}
+#albPick button{display:flex;justify-content:space-between;gap:10px;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px}
+#albPick button span{color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
+
 /* Avisos */
 .pushcard{margin-top:16px;gap:10px}
 .pushcard b.h{font:400 1.3rem/1.2 var(--f-display)}
@@ -517,6 +524,19 @@ code.url{display:block;padding:10px 12px;border-radius:10px;background:var(--bg)
     </div>
   </div>
 </div>
+<div class="sheet" id="albSheet" hidden>
+  <div role="dialog" aria-modal="true" aria-labelledby="albTitle">
+    <p class="eyebrow" id="albKind">Álbum</p>
+    <h2 id="albTitle"></h2>
+    <p class="hint" id="albWhat"></p>
+    <button class="opt" type="button" data-m="order"><i><svg><use href="#i-play"/></svg></i><span><b>En orden</b><span>De la primera a la última y se detiene.</span></span></button>
+    <button class="opt" type="button" data-m="shuffle"><i><svg><use href="#i-shuffle"/></svg></i><span><b>Aleatorio</b><span>Todas en desorden, sin repetir ninguna.</span></span></button>
+    <button class="opt" type="button" data-m="loop"><i><svg><use href="#i-repeat"/></svg></i><span><b>En bucle</b><span>Todas en orden, una y otra vez.</span></span></button>
+    <button class="opt" type="button" data-m="one"><i><svg><use href="#i-repeat1"/></svg></i><span><b>Repetir una canción</b><span>Elige cuál y suena sin parar.</span></span></button>
+    <div id="albPick" hidden></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" type="button" id="albClose">Cerrar</button></div>
+  </div>
+</div>
 <div class="mini" id="mini" hidden>
   <button class="mini-main" id="miniOpen" aria-label="Abrir reproductor"><span class="mini-art" id="miniArt"></span><span class="mini-txt"><b id="miniTitle"></b><span id="miniSub"></span></span></button>
   <button class="mini-btn" id="miniPlay" aria-label="Reproducir"><svg><use href="#i-play"/></svg></button>
@@ -692,8 +712,8 @@ const visible = (t = today()) => S.songs.filter(s => !s.date || s.date <= t);
 const herOrder = () => visible().sort((a,b) => (b.date||"").localeCompare(a.date||"") || byId(b,a));
 
 /* Canción del día: la dedicada para hoy; si hoy no hay nueva, una de las anteriores en rotación. El widget usa la misma regla. */
-function songOfDay(){
-  const t = today(), vis = visible(t).sort(byId);
+function songOfDay(t = today()){
+  const vis = visible(t).sort(byId);
   if (!vis.length) return null;
   const fresh = vis.filter(s => s.date === t);
   if (fresh.length) return { song: fresh[fresh.length-1], fresh: true };
@@ -984,6 +1004,41 @@ $("#pushTest").onclick = async () => {
   catch (err) { m.className = "msg err"; m.textContent = ghError(err); }
 };
 
+/* ---------- Escuchar un álbum o artista completo ---------- */
+let albItems = [];
+function openAlbumSheet(gi){
+  const name = S.groupNames && S.groupNames[gi]; if (!name) return;
+  albItems = S.groups.get(name).slice();
+  if (S.groupKind === "artist") albItems.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  $("#albKind").textContent = S.groupKind === "artist" ? "Artista" : "Álbum";
+  $("#albTitle").textContent = name;
+  $("#albWhat").textContent = `${albItems.length} ${albItems.length === 1 ? "canción" : "canciones"}`;
+  $("#albPick").hidden = true; $("#albPick").innerHTML = "";
+  $("#albSheet").hidden = false;
+}
+function playAlbum(mode, first){
+  shuffleOn = mode === "shuffle";
+  repeatMode = mode === "loop" ? "all" : mode === "one" ? "one" : "off";
+  ls.set("anahi-shuffle", shuffleOn); ls.set("anahi-repeat", repeatMode);
+  const start = first || (shuffleOn ? albItems[Math.floor(Math.random() * albItems.length)] : albItems[0]);
+  P.order = null; $("#albSheet").hidden = true;
+  startSong(start, albItems, { autoplay: true, show: true });
+  toast({ order: "En orden", shuffle: "En aleatorio", loop: "En bucle", one: "Repitiendo esta canción" }[mode]);
+}
+$("#albSheet").addEventListener("click", e => {
+  if (e.target.id === "albSheet" || e.target.id === "albClose") { $("#albSheet").hidden = true; return; }
+  const o = e.target.closest("[data-m]");
+  if (o) {
+    if (o.dataset.m === "one" && albItems.length > 1) {
+      const pk = $("#albPick"); pk.hidden = false;
+      pk.innerHTML = albItems.map((x, i) => `<button type="button" data-one="${i}"><b>${esc(x.title)}</b><span>${trackOf(x) ? "Pista " + trackOf(x) : esc(niceDate(x.date))}</span></button>`).join("");
+      return;
+    }
+    return playAlbum(o.dataset.m);
+  }
+  const one = e.target.closest("[data-one]"); if (one) playAlbum("one", albItems[+one.dataset.one]);
+});
+
 /* ---------- Vistas ---------- */
 function renderToday(){
   $("#adminBanner").hidden = !isAdmin();
@@ -1018,9 +1073,17 @@ function renderToday(){
   renderRecent();
 }
 function renderRecent(){
-  const pick = songOfDay(), list = herOrder().filter(x => x.id !== pick?.song.id && x.id !== DEMO.id).slice(0, 4);
-  $("#recentBox").hidden = !list.length;
-  $("#recentList").innerHTML = list.map(x => itemHTML(x, false)).join("");
+  const pick = songOfDay(), used = new Set([pick && pick.song.id, DEMO.id]), out = [], now = new Date();
+  for (let k = 1; k <= 45 && out.length < 4; k++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - k), p = songOfDay(ymd(d));
+    if (!p || used.has(p.song.id)) continue;
+    used.add(p.song.id);
+    const wd = new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric" }).format(d);
+    out.push({ s: p.song, label: k === 1 ? "Ayer" : k === 2 ? "Antier" : wd.charAt(0).toUpperCase() + wd.slice(1) });
+  }
+  S.recentQueue = out.map(o => o.s);
+  $("#recentBox").hidden = !out.length;
+  $("#recentList").innerHTML = out.map(o => itemHTML(o.s, false, null, o.label)).join("");
 }
 
 function renderList(){
@@ -1039,16 +1102,19 @@ function renderList(){
   for (const x of list) { const k = keyOf(x); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(x); }
   const unknown = g === "album" ? "Álbum sin identificar" : "Sin artista";
   const names = [...groups.keys()].sort((a, b) => (a === unknown) - (b === unknown) || groups.get(b).length - groups.get(a).length || a.localeCompare(b, "es"));
+  // Dentro de un álbum, en orden de pista cuando se conoce; si no, en el orden en que se dedicaron
+  if (g === "album") for (const k of names) groups.get(k).sort((a, b) => (trackOf(a) || 999) - (trackOf(b) || 999) || (a.date || "").localeCompare(b.date || ""));
+  S.groups = groups; S.groupNames = names; S.groupKind = g;
   S.displayed = names.flatMap(k => groups.get(k));
-  ul.innerHTML = names.map(k => {
+  ul.innerHTML = names.map((k, gi) => {
     const items = groups.get(k), cov = coverOf(items.find(coverOf));
     const sub = g === "album" ? (mainArtist(items[0].artist) || "") : "";
-    return `<li class="grp">${g === "album" && cov ? `<img src="${esc(cov)}" alt="">` : ""}<div><b>${esc(k)}</b><span>${sub ? esc(sub) + " · " : ""}${items.length} ${items.length === 1 ? "canción" : "canciones"}</span></div></li>`
+    return `<li class="grp">${g === "album" && cov ? `<img src="${esc(cov)}" alt="">` : ""}<div><b>${esc(k)}</b><span>${sub ? esc(sub) + " · " : ""}${items.length} ${items.length === 1 ? "canción" : "canciones"}</span></div><button type="button" class="grpplay" data-grp="${gi}" aria-label="Escuchar ${esc(k)}"><svg><use href="#i-play"/></svg>Escuchar</button></li>`
       + items.map(x => itemHTML(x, admin, g)).join("");
   }).join("");
 }
 function renderLists(){ renderList(); renderRecent(); }
-function itemHTML(s, admin, g){
+function itemHTML(s, admin, g, label){
     const t = today(), scheduled = s.date && s.date > t, open = S.openMenu === s.id;
     const na = !navigator.onLine && s.audio && !isDown(s);
     return `<li class="item ${na ? "na" : ""}" data-id="${esc(s.id)}">
@@ -1062,7 +1128,7 @@ function itemHTML(s, admin, g){
           ${admin && !s.audio ? `<span class="tag warn">Sin audio</span>` : ""}
         </div></div>
       <span class="side">${admin && s.id !== DEMO.id ? `<button class="more" data-act="menu" aria-label="Opciones de ${esc(s.title)}" aria-expanded="${open}"><svg width="20" height="20"><use href="#i-dots"/></svg></button>`
-              : `<span class="when">${esc(niceDate(s.date))}</span>`}${dlButton(s)}</span>
+              : `<span class="when">${esc(label || niceDate(s.date))}</span>`}${dlButton(s)}</span>
       ${open ? `<div class="actions"><button class="btn" data-act="edit">Editar</button><button class="btn danger" data-act="del">Eliminar</button></div>` : ""}
       ${S.confirmDel === s.id ? `<div class="actions"><span class="hint" style="flex-basis:100%">¿Quitar "${esc(s.title)}"? Anahí ya no la verá.</span>
         <button class="btn danger" data-act="delyes">Sí, quitarla</button><button class="btn" data-act="delno">No</button></div>` : ""}
@@ -1071,9 +1137,15 @@ function itemHTML(s, admin, g){
     </li>`;
 }
 async function onListClick(e){
+  const gb = e.target.closest("[data-grp]");
+  if (gb) return openAlbumSheet(+gb.dataset.grp);
   const b = e.target.closest("[data-act]"); if (!b) return;
   const id = b.closest(".item").dataset.id, s = S.songs.find(x => x.id === id), act = b.dataset.act;
-  if (act === "play") { const inList = b.closest("#songList") && S.displayed && S.displayed.length; return openPlayer(s, inList ? S.displayed : (isAdmin() ? S.songs : herOrder())); }
+  if (act === "play") {
+    if (b.closest("#recentList") && S.recentQueue && S.recentQueue.length) return openPlayer(s, S.recentQueue);
+    const inList = b.closest("#songList") && S.displayed && S.displayed.length;
+    return openPlayer(s, inList ? S.displayed : (isAdmin() ? S.songs : herOrder()));
+  }
   if (act === "dl") return downloadSong(s);
   if (act === "undl") { S.confirmUndl = S.confirmUndl === id ? null : id; return renderLists(); }
   if (act === "undlno") { S.confirmUndl = null; return renderLists(); }
@@ -1159,6 +1231,8 @@ const coverMap = ls.get("anahi-covers", {});
 const coverOf = s => (s && (s.cover || coverMap[s.id])) || null;
 const albumMap = ls.get("anahi-albums", {});
 const albumOf = s => (s && (s.album || albumMap[s.id])) || null;
+const trackMap = ls.get("anahi-tracks", {});
+const trackOf = s => (s && (s.track || trackMap[s.id])) || null;
 const mainArtist = a => String(a || "").split(/,| ft\.? | feat\.? | & | x | y /i)[0].trim();
 function jsonp(url){ return new Promise(res => {
   const cb = "itcb" + Date.now() + Math.floor(Math.random() * 1e4), sc = document.createElement("script");
@@ -1172,7 +1246,8 @@ async function findCover(title, artist){
   const r0 = j && j.results && j.results[0];
   if (!r0) return null;
   return { cover: r0.artworkUrl100 ? r0.artworkUrl100.replace(/\/\d+x\d+bb\./, "/600x600bb.") : null,
-           album: (r0.collectionName || "").replace(/ - (Single|EP)$/i, "").trim() || null };
+           album: (r0.collectionName || "").replace(/ - (Single|EP)$/i, "").trim() || null,
+           track: r0.trackNumber || null };
 }
 const coverPending = new Set();
 async function ensureCover(s){
@@ -1183,6 +1258,7 @@ async function ensureCover(s){
     if (m) {
       if (m.cover && !coverOf(s)) { coverMap[s.id] = m.cover; ls.set("anahi-covers", coverMap); }
       if (m.album && !albumOf(s)) { albumMap[s.id] = m.album; ls.set("anahi-albums", albumMap); }
+      if (m.track && !trackOf(s)) { trackMap[s.id] = m.track; ls.set("anahi-tracks", trackMap); }
       paintCovers(s.id);
     }
   } catch {}
@@ -1324,10 +1400,22 @@ function setPlayIcon(on){
 }
 
 /* Orden: siguiente, aleatorio y repetir */
+const qKey = q => q.map(x => x.id).join("|");
+function buildOrder(){
+  const q = P.queue, i = q.findIndex(x => x.id === P.song?.id), rest = q.map((_, k) => k).filter(k => k !== i);
+  for (let k = rest.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [rest[k], rest[j]] = [rest[j], rest[k]]; }
+  P.order = [i, ...rest]; P.orderKey = qKey(q);
+}
 function pickNext(){
   const q = P.queue, i = q.findIndex(x => x.id === P.song?.id);
   if (q.length < 2) return -1;
-  if (shuffleOn) { let j; do { j = Math.floor(Math.random() * q.length); } while (j === i); return j; }
+  if (shuffleOn) {
+    if (!P.order || P.orderKey !== qKey(q) || !P.order.includes(i)) buildOrder();
+    const pos = P.order.indexOf(i);
+    if (pos + 1 < P.order.length) return P.order[pos + 1];
+    if (repeatMode === "all") { buildOrder(); return P.order[1] ?? -1; }
+    return -1;
+  }
   if (i + 1 < q.length) return i + 1;
   return repeatMode === "all" ? 0 : -1;
 }
@@ -1335,7 +1423,10 @@ function step(d, auto){
   if (!P.song) return;
   if (d < 0 && P.clock && P.clock.time() > 4) { P.clock.seek(0); updatePos(true); return; }
   const q = P.queue, i = q.findIndex(x => x.id === P.song.id);
-  const j = d > 0 ? P.nextPick : (q.length > 1 ? (i - 1 + q.length) % q.length : -1);
+  let j;
+  if (d > 0) j = P.nextPick;
+  else if (shuffleOn && P.order && P.order.indexOf(i) > 0) j = P.order[P.order.indexOf(i) - 1];
+  else j = q.length > 1 ? (i - 1 + q.length) % q.length : -1;
   if (j < 0) { if (auto) { P.clock.seek(0); togglePlay(false); } return; }
   startSong(q[j], q, { autoplay: true, show: !$("#player").hidden });
 }
@@ -1351,7 +1442,7 @@ function syncModes(){
   rp.innerHTML = `<svg><use href="#i-${repeatMode === "one" ? "repeat1" : "repeat"}"/></svg>`;
   rp.setAttribute("aria-label", repeatMode === "one" ? "Repetir esta canción" : repeatMode === "all" ? "Repetir todas" : "No repetir");
 }
-$("#pShuf").onclick = () => { shuffleOn = !shuffleOn; ls.set("anahi-shuffle", shuffleOn); P.nextPick = pickNext(); P.preloaded = null; syncModes(); toast(shuffleOn ? "Aleatorio activado" : "Aleatorio desactivado"); };
+$("#pShuf").onclick = () => { shuffleOn = !shuffleOn; ls.set("anahi-shuffle", shuffleOn); if (shuffleOn) buildOrder(); P.nextPick = pickNext(); P.preloaded = null; syncModes(); toast(shuffleOn ? "Aleatorio activado" : "Aleatorio desactivado"); };
 $("#pRep").onclick = () => { repeatMode = { off: "all", all: "one", one: "off" }[repeatMode]; ls.set("anahi-repeat", repeatMode); P.nextPick = pickNext(); syncModes();
   toast(repeatMode === "one" ? "Se repetirá esta canción" : repeatMode === "all" ? "Se repetirán todas" : "Al terminar la lista se detiene"); };
 
@@ -1497,9 +1588,9 @@ $("#editor").addEventListener("submit", async e => {
       audio = newPath;
     }
     const same = prev && prev.title === f.title && prev.artist === f.artist;
-    let cover = (same && prev.cover) || null, album = (same && prev.album) || null;
-    if (!cover || !album) { msg("Buscando portada y álbum…"); try { const m = await findCover(f.title, f.artist); if (m) { cover = cover || m.cover; album = album || m.album; } } catch {} }
-    const entry = { id, title: f.title, artist: f.artist, dedication: f.dedication, color: f.color, date: f.date, audio, lyrics: f.lyrics, ...(f.translation ? { translation: f.translation } : {}), ...(f.spotify ? { spotify: f.spotify } : {}), ...(cover ? { cover } : {}), ...(album ? { album } : {}) };
+    let cover = (same && prev.cover) || null, album = (same && prev.album) || null, track = (same && prev.track) || null;
+    if (!cover || !album) { msg("Buscando portada y álbum…"); try { const m = await findCover(f.title, f.artist); if (m) { cover = cover || m.cover; album = album || m.album; track = track || m.track; } } catch {} }
+    const entry = { id, title: f.title, artist: f.artist, dedication: f.dedication, color: f.color, date: f.date, audio, lyrics: f.lyrics, ...(f.translation ? { translation: f.translation } : {}), ...(f.spotify ? { spotify: f.spotify } : {}), ...(cover ? { cover } : {}), ...(album ? { album } : {}), ...(track ? { track } : {}) };
     const next = prev ? remote.map(x => x.id === id ? entry : x) : [...remote, entry];
     files.push(songsFile(next));
     await commit(files, `${prev ? "Editar" : "Dedicar"}: ${f.title}`, label => msg(`${label}…`));
