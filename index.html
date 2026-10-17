@@ -1188,7 +1188,7 @@ function itemHTML(s, admin, g, label){
         </div></div>
       <span class="side">${admin && s.id !== DEMO.id ? `<button class="more" data-act="menu" aria-label="Opciones de ${esc(s.title)}" aria-expanded="${open}"><svg width="20" height="20"><use href="#i-dots"/></svg></button>`
               : `<span class="when">${esc(label || niceDate(s.date))}</span>`}${dlButton(s)}</span>
-      ${open ? `<div class="actions"><button class="btn" data-act="edit">Editar</button><button class="btn danger" data-act="del">Eliminar</button></div>` : ""}
+      ${open ? `<div class="actions"><button class="btn" data-act="preview">Vista previa</button><button class="btn" data-act="edit">Editar</button><button class="btn danger" data-act="del">Eliminar</button></div>` : ""}
       ${S.confirmDel === s.id ? `<div class="actions"><span class="hint" style="flex-basis:100%">¿Quitar "${esc(s.title)}"? Anahí ya no la verá.</span>
         <button class="btn danger" data-act="delyes">Sí, quitarla</button><button class="btn" data-act="delno">No</button></div>` : ""}
       ${S.confirmUndl === s.id ? `<div class="actions"><span class="hint" style="flex-basis:100%">¿Quitar la descarga de "${esc(s.title)}"? Seguirá en tu lista y podrás escucharla con internet.</span>
@@ -1210,6 +1210,7 @@ async function onListClick(e){
   if (act === "undlno") { S.confirmUndl = null; return renderLists(); }
   if (act === "undlyes") { await audioDel(id); S.offline.delete(id); S.confirmUndl = null; renderLists(); return renderOffline(); }
   if (act === "menu") { S.openMenu = S.openMenu === id ? null : id; S.confirmDel = null; return renderList(); }
+  if (act === "preview") return previewSong(s);
   if (act === "edit") { S.openMenu = null; renderList(); startEdit(s, false); location.hash = "dedicar"; return; }
   if (act === "del") { S.confirmDel = id; S.openMenu = null; return renderList(); }
   if (act === "delno") { S.confirmDel = null; return renderList(); }
@@ -1861,6 +1862,12 @@ $("#bPreview").onclick = () => {
   startSong(obj, [obj], { autoplay: true, show: true });
 };
 
+function previewSong(x){
+  if (!x) return;
+  const obj = { ...x, draft: true, lines: x.lines || parseLyrics(x.lyrics), tr: x.tr || trLines(x.translation) };
+  startSong(obj, [obj], { autoplay: true, show: true });
+}
+
 /* ---------- Borrador automático ---------- */
 let asT = 0;
 function queueAutosave(){ clearTimeout(asT); asT = setTimeout(autoSave, 1200); }
@@ -1904,14 +1911,29 @@ async function loadCalendar(){
 const isDedicated = c => S.songs.some(x => norm(x.title) === norm(c.title));
 function renderCal(){
   const box = $("#calCard");
-  if (!isAdmin() || !CAL.length || E.target) { box.hidden = true; return; }
-  const t = today(), hoy = CAL.find(c => c.date === t), next = CAL.filter(c => c.date > t).slice(0, 7);
+  if (!isAdmin() || E.target) { box.hidden = true; return; }
+  const t = today();
+  const sched = S.songs.filter(x => x.date && x.date >= t && x.id !== DEMO.id).sort((a, b) => a.date.localeCompare(b.date) || byId(a, b));
+  if (!CAL.length && !sched.length) { box.hidden = true; return; }
+  const days = []; for (let k = 0; k < 10; k++) { const d = new Date(); d.setDate(d.getDate() + k); days.push(ymd(d)); }
+  const row = d => {
+    const label = d === t ? "hoy" : niceDate(d), mine = sched.filter(x => x.date === d), plan = CAL.find(c => c.date === d);
+    if (mine.length) return mine.map(x => `<div class="calrow"><div><b>${esc(x.title)}</b><span>${esc(x.artist || "")} · ${esc(label)} · ${d === t ? "dedicada ✓" : "programada ✓"}</span></div><button type="button" class="btn" data-prev="${esc(x.id)}">Vista previa</button></div>`).join("");
+    if (plan) return `<div class="calrow"><div><b>${esc(plan.title)}</b><span>${esc(plan.artist)} · ${esc(label)} · en el plan</span></div>${isDedicated(plan) ? `<span class="tag">Ya dedicada ✓</span>` : `<button type="button" class="btn${d === t ? " primary" : ""}" data-cal="${esc(d)}">${d === t ? "Dedicar la de hoy" : "Usar"}</button>`}</div>`;
+    return `<div class="calrow"><div><b style="color:var(--muted)">Sin canción</b><span>${esc(label)}</span></div><button type="button" class="btn" data-free="${esc(d)}">Programar</button></div>`;
+  };
+  const later = sched.filter(x => x.date > days[days.length - 1]);
   box.hidden = false;
-  box.innerHTML = `<p class="eyebrow">Calendario de canciones</p>
-    ${hoy ? `<div class="calrow"><div><b>${esc(hoy.title)}</b><span>${esc(hoy.artist)} · hoy</span></div>${isDedicated(hoy) ? `<span class="tag">Ya dedicada ✓</span>` : `<button type="button" class="btn primary" data-cal="${esc(hoy.date)}">Dedicar la de hoy</button>`}</div>`
-          : `<p class="hint">Hoy no hay canción en el calendario.</p>`}
-    ${next.length ? `<details><summary>Próximos días</summary>${next.map(c => `<div class="calrow"><div><b>${esc(c.title)}</b><span>${esc(c.artist)} · ${esc(niceDate(c.date))}</span></div>${isDedicated(c) ? `<span class="tag">✓</span>` : `<button type="button" class="btn" data-cal="${esc(c.date)}">Usar</button>`}</div>`).join("")}</details>` : ""}`;
+  box.innerHTML = `<p class="eyebrow">Calendario de canciones</p>${row(t)}
+    <details${S.calOpen ? " open" : ""} data-k="next"><summary>Próximos días · ${sched.filter(x => x.date > t && x.date <= days[days.length - 1]).length} programadas</summary>${days.slice(1).map(row).join("")}</details>
+    ${later.length ? `<details data-k="later"><summary>Más adelante · ${later.length} programadas</summary>${later.map(x => `<div class="calrow"><div><b>${esc(x.title)}</b><span>${esc(x.artist || "")} · ${esc(niceDate(x.date))}</span></div><button type="button" class="btn" data-prev="${esc(x.id)}">Vista previa</button></div>`).join("")}</details>` : ""}`;
 }
+$("#calCard").addEventListener("toggle", e => { if (e.target.dataset && e.target.dataset.k === "next") S.calOpen = e.target.open; }, true);
+$("#calCard").addEventListener("click", e => {
+  const pv = e.target.closest("[data-prev]"); if (pv) return previewSong(S.songs.find(x => x.id === pv.dataset.prev));
+  const fr = e.target.closest("[data-free]");
+  if (fr) { resetEditor(); $("#fDate").value = fr.dataset.free; msg(`Programando para el ${niceDate(fr.dataset.free, { day: "numeric", month: "long" })}. Elige el MP3 o pega el enlace de Spotify.`, "ok"); $("#fAudio").scrollIntoView({ block: "center", behavior: "smooth" }); }
+});
 $("#calCard").addEventListener("click", async e => {
   const b = e.target.closest("[data-cal]"); if (!b) return;
   const c = CAL.find(x => x.date === b.dataset.cal); if (!c) return;
@@ -1935,6 +1957,7 @@ function renderBatch(){
       <input type="text" data-f="artist" value="${esc(it.artist || "")}" placeholder="Artista" aria-label="Artista">
       <input type="text" data-f="dedication" value="${esc(it.dedication || "")}" placeholder="Tu mensaje (opcional)" aria-label="Mensaje">
       <div class="row"><input type="date" data-f="date" value="${esc(it.date || "")}" aria-label="Día que la recibe"><span class="hint">${esc(it.status)}${it.dur ? " · " + fmt(it.dur) : ""}</span></div>
+      ${it.busy ? "" : `<button type="button" class="btn" data-pv="${i}" style="justify-self:start">Vista previa</button>`}
     </div>
     <button type="button" class="more" data-x="${i}" aria-label="Quitar ${esc(it.title)}">✕</button></li>`).join("");
 }
@@ -1977,7 +2000,10 @@ $("#bFiles").addEventListener("change", async e => {
   await assignDates(); renderBatch();
 });
 $("#batchList").addEventListener("input", e => { const li = e.target.closest(".brow"); if (!li || !e.target.dataset.f) return; BATCH[+li.dataset.i][e.target.dataset.f] = e.target.value; });
-$("#batchList").addEventListener("click", e => { const x = e.target.closest("[data-x]"); if (!x) return; const it = BATCH.splice(+x.dataset.x, 1)[0]; if (it && it.picURL) URL.revokeObjectURL(it.picURL); renderBatch(); });
+$("#batchList").addEventListener("click", e => {
+  const pv = e.target.closest("[data-pv]");
+  if (pv) { const it = BATCH[+pv.dataset.pv]; if (it) previewSong({ id: "__lote" + pv.dataset.pv, title: it.title, artist: it.artist, dedication: it.dedication, color: COLORS[+pv.dataset.pv % COLORS.length][1], cover: it.cover || it.picURL, album: it.album, lyrics: it.lyrics || "", audioBlob: it.file }); return; }
+  const x = e.target.closest("[data-x]"); if (!x) return; const it = BATCH.splice(+x.dataset.x, 1)[0]; if (it && it.picURL) URL.revokeObjectURL(it.picURL); renderBatch(); });
 $("#batchClear").onclick = () => { BATCH.splice(0).forEach(it => it.picURL && URL.revokeObjectURL(it.picURL)); renderBatch(); $("#batchMsg").textContent = ""; };
 $("#batchGo").onclick = async () => {
   const m = $("#batchMsg"), btn = $("#batchGo");
