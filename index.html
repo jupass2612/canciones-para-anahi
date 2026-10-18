@@ -1123,12 +1123,13 @@ function renderToday(){
   const s = pick.song;
   const date = new Intl.DateTimeFormat("es-MX", { weekday:"long", day:"numeric", month:"long" }).format(new Date());
   const first = s.lines.find(l => l.text && l.text !== "♪");
+  const moreToday = pick.fresh ? visible().filter(x => x.date === today() && x.id !== s.id).length : 0;
   box.innerHTML = `
     <article class="today" style="--song:${esc(s.color||"#a8204f")}">
       <span class="rings"></span>
       <div class="thead">${coverOf(s) ? `<img class="tcover" src="${esc(coverOf(s))}" alt="">` : ""}<div>
         <span class="date">${esc(date)}</span>
-        ${pick.fresh ? `<span class="fresh">NUEVA · HOY TE DEDICO ESTA</span>` : `<span class="fresh">PARA ESCUCHAR HOY</span>`}
+        ${pick.fresh ? `<span class="fresh">NUEVA · HOY TE DEDICO ESTA${moreToday ? ` Y ${moreToday} MÁS` : ""}</span>` : `<span class="fresh">PARA ESCUCHAR HOY</span>`}
       </div></div>
       <h2 class="t">${esc(s.title)}</h2>
       <div class="a">${esc(s.artist||"")}</div>
@@ -1145,14 +1146,24 @@ function renderToday(){
   $("#countLine").innerHTML = n ? `Llevas <b>${n}</b> ${n === 1 ? "canción dedicada" : "canciones dedicadas"}.` : "";
   renderRecent();
 }
+/* Las más recientes: primero las demás que le dedicaste hoy, luego todas las de ayer (la más nueva arriba);
+   si hay pocas, se completa con las de días anteriores. */
+function dayLabel(str){
+  const [y, m, d] = str.split("-").map(Number), dt = new Date(y, m - 1, d), k = dayNum(today()) - dayNum(str);
+  if (k <= 0) return "Hoy"; if (k === 1) return "Ayer"; if (k === 2) return "Antier";
+  const wd = new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric" }).format(dt);
+  return wd.charAt(0).toUpperCase() + wd.slice(1);
+}
 function renderRecent(){
-  const pick = songOfDay(), used = new Set([pick && pick.song.id, DEMO.id]), out = [], now = new Date();
-  for (let k = 1; k <= 45 && out.length < 4; k++) {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - k), p = songOfDay(ymd(d));
-    if (!p || used.has(p.song.id)) continue;
-    used.add(p.song.id);
-    const wd = new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric" }).format(d);
-    out.push({ s: p.song, label: k === 1 ? "Ayer" : k === 2 ? "Antier" : wd.charAt(0).toUpperCase() + wd.slice(1) });
+  const pick = songOfDay(), t = today(), used = new Set([pick && pick.song.id, DEMO.id]);
+  const yest = ymd(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 1));
+  const list = visible(t).filter(s => s.date && !used.has(s.id)).sort((a, b) => b.date.localeCompare(a.date) || byId(b, a));
+  const out = [];
+  for (const s of list) {
+    const recent = s.date >= yest;              // hoy y ayer: todas
+    if (!recent && out.length >= 4) break;     // de antes: solo hasta completar 4
+    if (out.length >= 30) break;
+    out.push({ s, label: dayLabel(s.date) });
   }
   S.recentQueue = out.map(o => o.s);
   $("#recentBox").hidden = !out.length;
